@@ -12,22 +12,74 @@ export function getString(formData: FormData, key: string) {
   return typeof value === "string" ? value.trim() : "";
 }
 
+function parseStringArrayValue(value: string): string[] {
+  const trimmed = value.trim();
+
+  if (!trimmed || trimmed === "[]") {
+    return [];
+  }
+
+  if (
+    (trimmed.startsWith("[") && trimmed.endsWith("]")) ||
+    (trimmed.startsWith('"') && trimmed.endsWith('"'))
+  ) {
+    try {
+      const parsed = JSON.parse(trimmed);
+
+      if (Array.isArray(parsed)) {
+        return parsed.flatMap((item) => (typeof item === "string" ? parseStringArrayValue(item) : []));
+      }
+
+      if (typeof parsed === "string") {
+        return parseStringArrayValue(parsed);
+      }
+    } catch {
+      // Fall back to the raw trimmed value when the string is not valid JSON.
+    }
+  }
+
+  return [trimmed];
+}
+
 export function getStringArray(formData: FormData, key: string) {
-  const value = formData.get(key);
+  const values = formData.getAll(key);
 
-  if (typeof value !== "string" || !value.trim()) {
-    return [];
+  return values
+    .filter((value): value is string => typeof value === "string")
+    .flatMap(parseStringArrayValue);
+}
+
+function normalizeUploadUrl(value: string) {
+  const trimmed = value.trim();
+
+  if (!trimmed || trimmed === "[]") {
+    return null;
   }
 
-  const parsed = JSON.parse(value) as unknown;
-
-  if (!Array.isArray(parsed)) {
-    return [];
+  if (trimmed.startsWith("/")) {
+    return trimmed;
   }
 
-  return parsed
-    .map((item) => (typeof item === "string" ? item.trim() : ""))
-    .filter(Boolean);
+  if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    try {
+      return new URL(trimmed).toString();
+    } catch {
+      return null;
+    }
+  }
+
+  return null;
+}
+
+export function normalizeUploadUrls(values: string[]) {
+  return Array.from(
+    new Set(
+      values
+        .flatMap(parseStringArrayValue)
+        .map(normalizeUploadUrl)
+        .filter((value): value is string => Boolean(value))
+    )
+  );
 }
 
 export function getFiles(formData: FormData, key: string) {

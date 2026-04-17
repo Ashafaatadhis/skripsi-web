@@ -28,7 +28,7 @@ const mainItems = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { title: "Kosan", href: "/dashboard/kosan", icon: Building2 },
   { title: "Kamar", href: "/dashboard/kamar", icon: DoorOpen },
-  { title: "Booking", href: "/dashboard/booking", icon: BookOpen },
+  { title: "Sewa", href: "/dashboard/sewa", icon: BookOpen },
   { title: "Pembayaran", href: "/dashboard/pembayaran", icon: CreditCard },
 ];
 

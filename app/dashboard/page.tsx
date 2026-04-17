@@ -56,9 +56,9 @@ const actions = [
     icon: CreditCard,
   },
   {
-    title: "Booking",
-    description: "Kelola tenant yang sedang menempati kamar.",
-    href: "/dashboard/booking",
+    title: "Sewa",
+    description: "Pantau tenant yang sedang menempati kamar.",
+    href: "/dashboard/sewa",
     icon: BookOpen,
   },
 ];

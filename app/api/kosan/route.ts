@@ -43,6 +43,7 @@ export async function GET(request: Request) {
     skip: (page - 1) * PAGE_SIZE,
     take: PAGE_SIZE,
     include: {
+      images: true,
       _count: {
         select: { rooms: true },
       },
@@ -56,7 +57,7 @@ export async function GET(request: Request) {
       name: item.name,
       address: item.address,
       description: item.description,
-      imageUrls: item.imageUrls,
+      imageUrls: item.images.map((img) => img.url),
       roomsCount: item._count.rooms,
     })),
     meta: {
@@ -95,7 +96,12 @@ export async function POST(request: Request) {
       name,
       address,
       description: description || null,
-      imageUrls,
+      images: {
+        create: imageUrls.map((url) => ({ url })),
+      },
+    },
+    include: {
+      images: true,
     },
   });
 
@@ -107,7 +113,7 @@ export async function POST(request: Request) {
         name: kosan.name,
         address: kosan.address,
         description: kosan.description,
-        imageUrls: kosan.imageUrls,
+        imageUrls: kosan.images.map((img) => img.url),
         roomsCount: 0,
       },
     },

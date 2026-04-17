@@ -52,7 +52,13 @@ export async function PATCH(request: Request, context: RouteContext) {
       name,
       address,
       description: description || null,
-      imageUrls,
+      images: {
+        deleteMany: {},
+        create: imageUrls.map((url) => ({ url })),
+      },
+    },
+    include: {
+      images: true,
     },
   });
 
@@ -63,7 +69,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       name: updated.name,
       address: updated.address,
       description: updated.description,
-      imageUrls: updated.imageUrls,
+      imageUrls: updated.images.map((img) => img.url),
       roomsCount: kosan._count.rooms,
     },
   });

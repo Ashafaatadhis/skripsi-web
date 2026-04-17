@@ -31,6 +31,7 @@ type KamarItem = {
   monthlyPrice: number;
   quantity: number;
   imageUrls: string[];
+  facilities: string[];
   bookedCount: number;
   availableQuantity: number;
   kosanId: string;
@@ -59,6 +60,7 @@ type KamarPayload = {
   monthlyPrice: number;
   quantity: number;
   existingImageUrls: string[];
+  facilities: string[];
   newImages: File[];
 };
 
@@ -68,6 +70,7 @@ const emptyForm: KamarPayload = {
   monthlyPrice: 0,
   quantity: 0,
   existingImageUrls: [],
+  facilities: [],
   newImages: [],
 };
 
@@ -158,7 +161,8 @@ async function createKamar(payload: KamarPayload) {
   formData.set("name", payload.name);
   formData.set("monthlyPrice", String(payload.monthlyPrice));
   formData.set("quantity", String(payload.quantity));
-  formData.set("existingImageUrls", JSON.stringify(payload.existingImageUrls));
+  payload.existingImageUrls.forEach((url) => formData.append("existingImageUrls", url));
+  payload.facilities.forEach((f) => formData.append("facilities", f));
   payload.newImages.forEach((file) => formData.append("images", file));
 
   const response = await fetch("/api/kamar", {
@@ -182,7 +186,8 @@ async function updateKamar(id: string, payload: KamarPayload) {
   formData.set("name", payload.name);
   formData.set("monthlyPrice", String(payload.monthlyPrice));
   formData.set("quantity", String(payload.quantity));
-  formData.set("existingImageUrls", JSON.stringify(payload.existingImageUrls));
+  payload.existingImageUrls.forEach((url) => formData.append("existingImageUrls", url));
+  payload.facilities.forEach((f) => formData.append("facilities", f));
   payload.newImages.forEach((file) => formData.append("images", file));
 
   const response = await fetch(`/api/kamar/${id}`, {
@@ -218,6 +223,7 @@ export function KamarManager() {
   const [form, setForm] = React.useState<KamarPayload>(emptyForm);
   const [editingId, setEditingId] = React.useState<string | null>(null);
   const [formError, setFormError] = React.useState<string | null>(null);
+  const [facilityInput, setFacilityInput] = React.useState("");
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [deleteTarget, setDeleteTarget] = React.useState<KamarItem | null>(null);
   const [page, setPage] = React.useState(1);
@@ -299,6 +305,7 @@ export function KamarManager() {
       kosanId: kosanOptions[0]?.id ?? "",
     });
     setFormError(null);
+    setFacilityInput("");
   }
 
   function openCreateDialog() {
@@ -315,8 +322,10 @@ export function KamarManager() {
       monthlyPrice: item.monthlyPrice,
       quantity: item.quantity,
       existingImageUrls: item.imageUrls ?? [],
+      facilities: item.facilities ?? [],
       newImages: [],
     });
+    setFacilityInput("");
     setFormError(null);
     setDialogOpen(true);
   }
@@ -331,6 +340,7 @@ export function KamarManager() {
       monthlyPrice: Number(form.monthlyPrice),
       quantity: Number(form.quantity),
       existingImageUrls: form.existingImageUrls,
+      facilities: form.facilities,
       newImages: form.newImages,
     };
 
@@ -524,6 +534,48 @@ export function KamarManager() {
                           Jika quantity 0, kamar akan dianggap penuh.
                         </p>
                       </div>
+ 
+                      <div className="space-y-2">
+                        <label className="text-sm font-medium text-foreground" htmlFor="facilities">
+                          Fasilitas Kamar
+                        </label>
+                        <div className="flex flex-wrap gap-2 rounded-2xl border border-border/70 bg-background/90 p-2 focus-within:ring-2 focus-within:ring-ring/60 focus-within:ring-offset-2 focus-within:ring-offset-background dark:bg-background/50">
+                          {form.facilities.map((facility, index) => (
+                            <Badge key={`${facility}-${index}`} variant="secondary" className="gap-1 rounded-lg">
+                              {facility}
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setForm((c) => ({ ...c, facilities: c.facilities.filter((_, i) => i !== index) }))
+                                }
+                                className="ml-1 rounded-full outline-none ring-offset-background hover:bg-muted focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                              >
+                                <X className="h-3 w-3" />
+                                <span className="sr-only">Hapus {facility}</span>
+                              </button>
+                            </Badge>
+                          ))}
+                          <input
+                            type="text"
+                            value={facilityInput}
+                            disabled={isSubmitting}
+                            onChange={(e) => setFacilityInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                const val = facilityInput.trim();
+                                if (val && !form.facilities.includes(val)) {
+                                  setForm((c) => ({ ...c, facilities: [...c.facilities, val] }));
+                                  setFacilityInput("");
+                                }
+                              }
+                            }}
+                            placeholder="Ketik AC, tab/enter..."
+                            className="flex-1 min-w-[120px] bg-transparent px-2 py-1 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                          />
+                        </div>
+                        <p className="text-xs text-muted-foreground">Tekan Enter untuk menambah fasilitas.</p>
+                      </div>
 
                       <div className="space-y-2">
                         <label className="text-sm font-medium text-foreground" htmlFor="imageUrls">
@@ -647,7 +699,8 @@ export function KamarManager() {
                     <TableHead className="w-16">No</TableHead>
                     <TableHead>HID</TableHead>
                     <TableHead>Kamar</TableHead>
-                    <TableHead>Kosan</TableHead>
+                     <TableHead>Kosan</TableHead>
+                    <TableHead>Fasilitas</TableHead>
                     <TableHead>Harga</TableHead>
                     <TableHead>Gambar</TableHead>
                     <TableHead>Quantity</TableHead>
@@ -673,7 +726,16 @@ export function KamarManager() {
                           {kamar.humanId}
                         </TableCell>
                         <TableCell className="font-medium text-foreground">{kamar.name}</TableCell>
-                        <TableCell className="text-muted-foreground">{kamar.kosanName}</TableCell>
+                         <TableCell className="text-muted-foreground">{kamar.kosanName}</TableCell>
+                        <TableCell>
+                          <div className="flex flex-wrap gap-1">
+                            {kamar.facilities?.map((f, i) => (
+                              <Badge key={i} variant="outline" className="px-1.5 py-0 text-[10px] font-normal lowercase">
+                                {f}
+                              </Badge>
+                            ))}
+                          </div>
+                        </TableCell>
                         <TableCell className="text-muted-foreground">{formatRupiah(kamar.monthlyPrice)}</TableCell>
                         <TableCell>
                           <ImageStack images={kamar.imageUrls ?? []} />

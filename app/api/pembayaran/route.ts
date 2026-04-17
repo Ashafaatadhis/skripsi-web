@@ -1,42 +1,53 @@
 import { NextResponse } from "next/server";
 
-import { PaymentStatus } from "@/generated/prisma/enums";
-
+import { PaymentStatus } from "@/generated/prisma/client";
 import { getCurrentOwner } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { getFiles, getString, getStringArray, saveUploadedFiles } from "@/lib/server/uploads";
+import { normalizeUploadUrls } from "@/lib/server/uploads";
 
 const PAGE_SIZE = 10;
 
-function mapPayment(payment: {
+type PaymentWithRelations = {
   id: string;
+  humanId: string;
   amount: number;
-  dueDate: Date;
+  monthsPaid: number;
+  periodStart: Date;
+  periodEnd: Date;
   paidAt: Date | null;
   status: PaymentStatus;
   note: string | null;
-  proofImageUrls: string[];
-  booking: {
+  images: Array<{ url: string }>;
+  rental: {
     id: string;
+    humanId: string;
+    paidUntil: Date | null;
     tenant: { name: string };
     room: {
       name: string;
       kosan: { name: string };
     };
   };
-}) {
+};
+
+function mapPayment(payment: PaymentWithRelations) {
   return {
     id: payment.id,
+    humanId: payment.humanId,
+    rentalId: payment.rental.id,
+    rentalHumanId: payment.rental.humanId,
     amount: payment.amount,
-    dueDate: payment.dueDate.toISOString(),
+    monthsPaid: payment.monthsPaid,
+    periodStart: payment.periodStart.toISOString(),
+    periodEnd: payment.periodEnd.toISOString(),
     paidAt: payment.paidAt?.toISOString() ?? null,
     status: payment.status,
     note: payment.note,
-    proofImageUrls: payment.proofImageUrls,
-    bookingId: payment.booking.id,
-    tenantName: payment.booking.tenant.name,
-    roomName: payment.booking.room.name,
-    kosanName: payment.booking.room.kosan.name,
+    proofImageUrls: normalizeUploadUrls(payment.images.map((img) => img.url)),
+    paidUntil: payment.rental.paidUntil?.toISOString() ?? null,
+    tenantName: payment.rental.tenant.name,
+    roomName: payment.rental.room.name,
+    kosanName: payment.rental.room.kosan.name,
   };
 }
 
@@ -53,7 +64,7 @@ export async function GET(request: Request) {
   const safePage = Number.isFinite(pageParam) && pageParam > 0 ? Math.floor(pageParam) : 1;
 
   const where = {
-    booking: {
+    rental: {
       room: {
         kosan: {
           ownerId: owner.id,
@@ -62,6 +73,7 @@ export async function GET(request: Request) {
       ...(rawQuery
         ? {
             OR: [
+              { humanId: { contains: rawQuery, mode: "insensitive" as const } },
               { tenant: { name: { contains: rawQuery, mode: "insensitive" as const } } },
               { room: { name: { contains: rawQuery, mode: "insensitive" as const } } },
               { room: { kosan: { name: { contains: rawQuery, mode: "insensitive" as const } } } },
@@ -82,13 +94,16 @@ export async function GET(request: Request) {
 
   const payments = await prisma.payment.findMany({
     where,
-    orderBy: [{ dueDate: "desc" }, { createdAt: "desc" }],
+    orderBy: [{ periodStart: "desc" }, { createdAt: "desc" }],
     skip: (page - 1) * PAGE_SIZE,
     take: PAGE_SIZE,
     include: {
-      booking: {
+      images: true,
+      rental: {
         select: {
           id: true,
+          humanId: true,
+          paidUntil: true,
           tenant: { select: { name: true } },
           room: {
             select: {
@@ -113,77 +128,9 @@ export async function GET(request: Request) {
   });
 }
 
-export async function POST(request: Request) {
-  const owner = await getCurrentOwner();
-
-  if (!owner) {
-    return NextResponse.json({ message: "Unauthorized." }, { status: 401 });
-  }
-
-  const formData = await request.formData();
-  const bookingId = getString(formData, "bookingId");
-  const amount = Number(getString(formData, "amount"));
-  const dueDateValue = getString(formData, "dueDate");
-  const dueDate = dueDateValue ? new Date(dueDateValue) : null;
-  const statusValue = getString(formData, "status");
-  const status = Object.values(PaymentStatus).find((item) => item === statusValue);
-  const note = getString(formData, "note");
-  const existingProofImageUrls = getStringArray(formData, "existingProofImageUrls");
-  const uploadedProofImageUrls = await saveUploadedFiles(getFiles(formData, "proofImages"), "payments");
-  const proofImageUrls = [...existingProofImageUrls, ...uploadedProofImageUrls];
-
-  if (!bookingId || !Number.isFinite(amount) || amount <= 0 || !dueDate || Number.isNaN(dueDate.getTime())) {
-    return NextResponse.json(
-      { message: "Booking, nominal, dan jatuh tempo wajib diisi dengan benar." },
-      { status: 400 }
-    );
-  }
-
-  if (!status || !Object.values(PaymentStatus).includes(status)) {
-    return NextResponse.json({ message: "Status pembayaran tidak valid." }, { status: 400 });
-  }
-
-  const booking = await prisma.booking.findFirst({
-    where: {
-      id: bookingId,
-      room: {
-        kosan: {
-          ownerId: owner.id,
-        },
-      },
-    },
-    select: { id: true },
-  });
-
-  if (!booking) {
-    return NextResponse.json({ message: "Booking tidak ditemukan." }, { status: 404 });
-  }
-
-  const payment = await prisma.payment.create({
-    data: {
-      bookingId: booking.id,
-      amount: Math.round(amount),
-      dueDate,
-      status,
-      note: note || null,
-      proofImageUrls,
-      paidAt: status === PaymentStatus.paid ? new Date() : null,
-    },
-    include: {
-      booking: {
-        select: {
-          id: true,
-          tenant: { select: { name: true } },
-          room: {
-            select: {
-              name: true,
-              kosan: { select: { name: true } },
-            },
-          },
-        },
-      },
-    },
-  });
-
-  return NextResponse.json({ payment: mapPayment(payment) }, { status: 201 });
+export async function POST() {
+  return NextResponse.json(
+    { message: "Pembuatan tagihan dilakukan lewat bot tenant." },
+    { status: 405 },
+  );
 }

@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { BookingStatus } from "@/generated/prisma/enums";
+import { RentalStatus } from "@/generated/prisma/client";
 
 import { getCurrentOwner } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
@@ -26,9 +26,9 @@ export async function GET() {
           name: true,
         },
       },
-      bookings: {
+      rentals: {
         where: {
-          status: BookingStatus.active,
+          status: RentalStatus.active,
         },
         select: {
           id: true,
@@ -39,7 +39,7 @@ export async function GET() {
 
   return NextResponse.json({
     rooms: rooms.map((room) => {
-      const bookedCount = room.bookings.length;
+      const bookedCount = room.rentals.length;
       const availableQuantity = Math.max(room.quantity - bookedCount, 0);
 
       return {

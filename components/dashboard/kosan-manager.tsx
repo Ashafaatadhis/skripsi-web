@@ -155,7 +155,13 @@ function ImageStack({ images }: { images: string[] }) {
             key={`${imageUrl}-${index}`}
             className="relative h-16 w-16 overflow-hidden rounded-md border border-border/70 bg-muted"
           >
-            <Image src={imageUrl} alt="Gambar kosan" fill className="object-cover" sizes="64px" />
+            <Image
+              src={imageUrl}
+              alt="Gambar kosan"
+              fill
+              className="object-cover"
+              sizes="64px"
+            />
           </div>
         ))}
       </div>

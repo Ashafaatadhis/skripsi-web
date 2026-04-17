@@ -13,11 +13,12 @@ function mapRoom(room: {
   name: string;
   monthlyPrice: number;
   quantity: number;
-  imageUrls: string[];
-  bookings: Array<{ id: string }>;
+  images: Array<{ url: string }>;
+  facilities: string[];
+  rentals: Array<{ id: string }>;
   kosan: { id: string; name: string };
 }) {
-  const bookedCount = room.bookings.length;
+  const bookedCount = room.rentals.length;
   const availableQuantity = Math.max(room.quantity - bookedCount, 0);
 
   return {
@@ -26,7 +27,8 @@ function mapRoom(room: {
     name: room.name,
     monthlyPrice: room.monthlyPrice,
     quantity: room.quantity,
-    imageUrls: room.imageUrls,
+    imageUrls: (room.images || []).map((img) => img.url),
+    facilities: room.facilities || [],
     bookedCount,
     availableQuantity,
     kosanId: room.kosan.id,
@@ -69,7 +71,8 @@ export async function GET(request: Request) {
     skip: (page - 1) * PAGE_SIZE,
     take: PAGE_SIZE,
     include: {
-      bookings: {
+      images: true,
+      rentals: {
         where: {
           status: "active",
         },
@@ -111,6 +114,7 @@ export async function POST(request: Request) {
   const monthlyPrice = Number(getString(formData, "monthlyPrice"));
   const quantity = Number(getString(formData, "quantity"));
   const existingImageUrls = getStringArray(formData, "existingImageUrls");
+  const facilities = getStringArray(formData, "facilities");
   const uploadedImageUrls = await saveUploadedFiles(getFiles(formData, "images"), "kamar");
   const imageUrls = [...existingImageUrls, ...uploadedImageUrls];
 
@@ -150,10 +154,14 @@ export async function POST(request: Request) {
       name,
       monthlyPrice: Math.round(monthlyPrice),
       quantity,
-      imageUrls,
+      images: {
+        create: imageUrls.map((url) => ({ url })),
+      },
+      facilities,
     },
     include: {
-      bookings: {
+      images: true,
+      rentals: {
         where: {
           status: "active",
         },
