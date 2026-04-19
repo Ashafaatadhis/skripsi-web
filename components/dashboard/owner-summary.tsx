@@ -1,9 +1,6 @@
-"use client";
-
-import { useQuery } from "@tanstack/react-query";
 import { CircleDollarSign } from "lucide-react";
 
-type SessionResponse = {
+type OwnerSummaryProps = {
   owner: {
     id: string;
     email: string;
@@ -11,24 +8,7 @@ type SessionResponse = {
   } | null;
 };
 
-async function getSession() {
-  const response = await fetch("/api/auth/session", {
-    credentials: "include",
-  });
-
-  if (!response.ok) {
-    throw new Error("Gagal mengambil session.");
-  }
-
-  return (await response.json()) as SessionResponse;
-}
-
-export function OwnerSummary() {
-  const { data } = useQuery({
-    queryKey: ["auth", "session"],
-    queryFn: getSession,
-  });
-
+export function OwnerSummary({ owner }: OwnerSummaryProps) {
   return (
     <div className="rounded-2xl border border-border/70 bg-background/70 p-4">
       <div className="flex items-center gap-3">
@@ -37,10 +17,10 @@ export function OwnerSummary() {
         </div>
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-foreground">
-            {data?.owner?.name ?? "Owner aktif"}
+            {owner?.name ?? "Owner aktif"}
           </p>
           <p className="truncate text-xs text-muted-foreground">
-            {data?.owner?.email ?? "1 akun terhubung"}
+            {owner?.email ?? "1 akun terhubung"}
           </p>
         </div>
       </div>

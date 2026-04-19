@@ -1,40 +1,24 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import {
   BedDouble,
   BookOpen,
   Building2,
-  DoorOpen,
   CreditCard,
+  DoorOpen,
   Search,
 } from "lucide-react";
 
+import { OverviewCharts } from "@/components/dashboard/overview-charts";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { getCurrentOwner } from "@/lib/auth";
+import { getDashboardOverview } from "@/lib/server/dashboard";
+import type { DashboardPaymentStatus } from "@/lib/types/dashboard";
 import { cn } from "@/lib/utils";
-
-const stats = [
-  {
-    title: "Kosan aktif",
-    value: "4",
-    note: "+1 bulan ini",
-    icon: Building2,
-  },
-  {
-    title: "Kamar terisi",
-    value: "96",
-    note: "87% occupancy",
-    icon: BedDouble,
-  },
-  {
-    title: "Tagihan pending",
-    value: "12",
-    note: "3 jatuh tempo hari ini",
-    icon: CreditCard,
-  },
-];
 
 const actions = [
   {
@@ -61,15 +45,101 @@ const actions = [
     href: "/dashboard/sewa",
     icon: BookOpen,
   },
-];
+] as const;
 
-const payments = [
-  { tenant: "Raka - A12", status: "Lunas", amount: "Rp850.000", time: "08:16" },
-  { tenant: "Nina - B05", status: "Menunggu verifikasi", amount: "Rp900.000", time: "09:05" },
-  { tenant: "Bagas - C02", status: "Terlambat", amount: "Rp800.000", time: "Kemarin" },
-];
+function formatNumber(value: number) {
+  return new Intl.NumberFormat("id-ID").format(value);
+}
 
-export default function DashboardPage() {
+function formatRupiah(value: number) {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(value);
+}
+
+function formatDateTime(value: Date) {
+  return new Intl.DateTimeFormat("id-ID", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(value);
+}
+
+function getPaymentStatusLabel(status: DashboardPaymentStatus) {
+  switch (status) {
+    case "paid":
+      return "Lunas";
+    case "pending":
+      return "Menunggu verifikasi";
+    case "overdue":
+      return "Terlambat";
+    case "cancelled":
+      return "Dibatalkan";
+    default:
+      return status;
+  }
+}
+
+function getPaymentStatusClassName(status: DashboardPaymentStatus) {
+  switch (status) {
+    case "paid":
+      return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-300";
+    case "pending":
+      return "bg-amber-500/15 text-amber-700 dark:text-amber-300";
+    case "overdue":
+      return "bg-red-500/15 text-red-700 dark:text-red-300";
+    case "cancelled":
+      return "bg-slate-500/15 text-slate-700 dark:text-slate-300";
+    default:
+      return "bg-secondary text-secondary-foreground";
+  }
+}
+
+export default async function DashboardPage() {
+  const owner = await getCurrentOwner();
+
+  if (!owner) {
+    redirect("/login");
+  }
+
+  const overview = await getDashboardOverview(owner.id);
+
+  const stats = [
+    {
+      title: "Kosan aktif",
+      value: formatNumber(overview.stats.kosanCount),
+      note:
+        overview.stats.kosanCount > 0
+          ? overview.stats.kosanAddedThisMonth > 0
+            ? `+${formatNumber(overview.stats.kosanAddedThisMonth)} bulan ini`
+            : "Belum ada tambahan kosan bulan ini"
+          : "Belum ada kosan terdaftar",
+      icon: Building2,
+    },
+    {
+      title: "Kamar terisi",
+      value: formatNumber(overview.stats.occupiedRoomSlots),
+      note: overview.stats.totalRoomSlots
+        ? `${formatNumber(overview.stats.occupancyRate)}% dari ${formatNumber(overview.stats.totalRoomSlots)} slot terisi`
+        : "Belum ada slot kamar",
+      icon: BedDouble,
+    },
+    {
+      title: "Tagihan pending",
+      value: formatNumber(overview.stats.pendingPayments),
+      note:
+        overview.stats.pendingPayments > 0
+          ? overview.stats.overduePayments > 0
+            ? `${formatNumber(overview.stats.overduePayments)} tagihan terlambat`
+            : "Menunggu verifikasi owner"
+          : overview.stats.overduePayments > 0
+            ? `${formatNumber(overview.stats.overduePayments)} tagihan terlambat`
+            : "Tidak ada tagihan yang menunggu",
+      icon: CreditCard,
+    },
+  ] as const;
+
   return (
     <div className="min-h-screen bg-muted/35 p-4 sm:p-6 lg:p-8">
       <div className="mx-auto max-w-7xl space-y-6">
@@ -83,7 +153,8 @@ export default function DashboardPage() {
                   Ringkasan operasional kosan
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                  Pantau kosan, kamar, pembayaran, dan aktivitas tenant dari satu layar.
+                  Pantau kosan, kamar, pembayaran, dan aktivitas tenant milik {owner.name} dari satu
+                  layar.
                 </p>
               </div>
             </div>
@@ -92,7 +163,7 @@ export default function DashboardPage() {
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
             <div className="relative min-w-0 flex-1 sm:w-72">
               <Search className="pointer-events-none absolute top-1/2 left-4 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input className="pl-10" placeholder="Cari kamar, tenant, atau kosan" />
+              <Input className="pl-10" placeholder="Cari detail data di menu kosan, kamar, atau sewa" />
             </div>
             <Link href="/login" className={cn(buttonVariants({ variant: "secondary" }))}>
               Ganti akun
@@ -123,6 +194,8 @@ export default function DashboardPage() {
           })}
         </section>
 
+        <OverviewCharts charts={overview.charts} />
+
         <section className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
           {actions.map((action) => {
             const Icon = action.icon;
@@ -137,7 +210,10 @@ export default function DashboardPage() {
                   <CardDescription>{action.description}</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  <Link href={action.href} className={cn(buttonVariants({ variant: "secondary" }), "w-full") }>
+                  <Link
+                    href={action.href}
+                    className={cn(buttonVariants({ variant: "secondary" }), "w-full")}
+                  >
                     Buka
                   </Link>
                 </CardContent>
@@ -150,26 +226,45 @@ export default function DashboardPage() {
           <Card className="bg-card/90">
             <CardHeader>
               <CardTitle>Pembayaran terbaru</CardTitle>
-              <CardDescription>Status transfer dan verifikasi terakhir.</CardDescription>
+              <CardDescription>
+                {overview.stats.kosanCount
+                  ? "Status transfer dan verifikasi paling baru dari semua kosan milik owner."
+                  : "Data pembayaran akan muncul setelah kosan dan sewa aktif mulai digunakan."}
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
-              {payments.map((payment) => (
-                <div
-                  key={payment.tenant}
-                  className="flex flex-col gap-3 rounded-[1.5rem] border border-border/70 bg-background/70 p-4 sm:flex-row sm:items-center sm:justify-between"
-                >
-                  <div>
-                    <p className="font-medium text-foreground">{payment.tenant}</p>
-                    <p className="text-sm text-muted-foreground">{payment.time}</p>
+              {overview.recentPayments.length ? (
+                overview.recentPayments.map((payment) => (
+                  <div
+                    key={payment.id}
+                    className="flex flex-col gap-3 rounded-[1.5rem] border border-border/70 bg-background/70 p-4 sm:flex-row sm:items-center sm:justify-between"
+                  >
+                    <div>
+                      <p className="font-medium text-foreground">
+                        {payment.tenantName} - {payment.roomName}
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        {payment.humanId} - {formatDateTime(payment.occurredAt)}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium text-foreground">
+                        {formatRupiah(payment.amount)}
+                      </span>
+                      <Badge
+                        variant="secondary"
+                        className={cn("border-transparent", getPaymentStatusClassName(payment.status))}
+                      >
+                        {getPaymentStatusLabel(payment.status)}
+                      </Badge>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-sm font-medium text-foreground">{payment.amount}</span>
-                    <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
-                      {payment.status}
-                    </span>
-                  </div>
+                ))
+              ) : (
+                <div className="rounded-[1.5rem] border border-dashed border-border/70 bg-background/50 p-6 text-sm text-muted-foreground">
+                  Belum ada pembayaran untuk akun owner ini.
                 </div>
-              ))}
+              )}
             </CardContent>
           </Card>
         </section>

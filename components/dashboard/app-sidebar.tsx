@@ -32,7 +32,15 @@ const mainItems = [
   { title: "Pembayaran", href: "/dashboard/pembayaran", icon: CreditCard },
 ];
 
-export function AppSidebar() {
+type AppSidebarProps = {
+  owner: {
+    id: string;
+    email: string;
+    name: string;
+  } | null;
+};
+
+export function AppSidebar({ owner }: AppSidebarProps) {
   const pathname = usePathname();
 
   return (
@@ -73,7 +81,7 @@ export function AppSidebar() {
 
       <SidebarFooter>
         <div className="space-y-3">
-          <OwnerSummary />
+          <OwnerSummary owner={owner} />
           <SidebarMenu>
             <SidebarMenuItem>
               <LogoutButton />

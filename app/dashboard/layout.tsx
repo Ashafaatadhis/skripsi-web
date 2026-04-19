@@ -14,7 +14,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar owner={owner} />
       <SidebarInset>{children}</SidebarInset>
     </SidebarProvider>
   );
