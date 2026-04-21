@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatAppDate } from "@/lib/datetime";
 
 type RentalItem = {
   id: string;
@@ -41,11 +42,6 @@ type RentalResponse = {
     q: string;
   };
 };
-
-function formatDate(value: string | null) {
-  if (!value) return "-";
-  return new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" }).format(new Date(value));
-}
 
 function formatRupiah(value: number) {
   return new Intl.NumberFormat("id-ID", {
@@ -189,8 +185,8 @@ export function RentalManager() {
                             <p className="text-xs text-muted-foreground">{rental.kosanName}</p>
                           </div>
                         </TableCell>
-                        <TableCell className="text-muted-foreground">{formatDate(rental.startDate)}</TableCell>
-                        <TableCell className="text-muted-foreground">{formatDate(rental.paidUntil)}</TableCell>
+                        <TableCell className="text-muted-foreground">{formatAppDate(rental.startDate)}</TableCell>
+                        <TableCell className="text-muted-foreground">{formatAppDate(rental.paidUntil)}</TableCell>
                         <TableCell className="text-muted-foreground">{formatRupiah(rental.monthlyPriceSnapshot)}</TableCell>
                         <TableCell>
                           <Badge variant={rental.status === RentalStatus.active ? "default" : "secondary"}>

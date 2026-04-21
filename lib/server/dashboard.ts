@@ -16,6 +16,7 @@ function getMonthLabel(date: Date) {
   return new Intl.DateTimeFormat("id-ID", {
     month: "short",
     year: "2-digit",
+    timeZone: "Asia/Jakarta",
   }).format(date);
 }
 

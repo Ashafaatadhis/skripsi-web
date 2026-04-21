@@ -16,6 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { getCurrentOwner } from "@/lib/auth";
+import { formatAppDateTime } from "@/lib/datetime";
 import { getDashboardOverview } from "@/lib/server/dashboard";
 import type { DashboardPaymentStatus } from "@/lib/types/dashboard";
 import { cn } from "@/lib/utils";
@@ -56,13 +57,6 @@ function formatRupiah(value: number) {
     style: "currency",
     currency: "IDR",
     maximumFractionDigits: 0,
-  }).format(value);
-}
-
-function formatDateTime(value: Date) {
-  return new Intl.DateTimeFormat("id-ID", {
-    dateStyle: "medium",
-    timeStyle: "short",
   }).format(value);
 }
 
@@ -244,7 +238,7 @@ export default async function DashboardPage() {
                         {payment.tenantName} - {payment.roomName}
                       </p>
                       <p className="text-sm text-muted-foreground">
-                        {payment.humanId} - {formatDateTime(payment.occurredAt)}
+                        {payment.humanId} - {formatAppDateTime(payment.occurredAt)}
                       </p>
                     </div>
                     <div className="flex items-center gap-3">

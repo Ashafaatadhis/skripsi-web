@@ -20,6 +20,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatAppDate } from "@/lib/datetime";
 
 type PaymentItem = {
   id: string;
@@ -78,11 +79,6 @@ function formatRupiah(value: number) {
     currency: "IDR",
     maximumFractionDigits: 0,
   }).format(value);
-}
-
-function formatDate(value: string | null) {
-  if (!value) return "-";
-  return new Intl.DateTimeFormat("id-ID", { dateStyle: "medium" }).format(new Date(value));
 }
 
 function getStatusLabel(status: PaymentStatus) {
@@ -379,7 +375,7 @@ export function PaymentManager() {
                         <TableCell className="text-muted-foreground">
                           <div className="space-y-1">
                             <p>
-                              {formatDate(payment.periodStart)} - {formatDate(payment.periodEnd)}
+                              {formatAppDate(payment.periodStart)} - {formatAppDate(payment.periodEnd)}
                             </p>
                             <p className="text-xs">{payment.monthsPaid} bulan</p>
                           </div>
@@ -485,13 +481,13 @@ export function PaymentManager() {
                 <form className="mt-6 space-y-4" onSubmit={submitForm}>
                   <div className="rounded-2xl border border-border/70 bg-background/70 p-4 text-sm text-muted-foreground">
                     <p>
-                      Periode: <span className="font-medium text-foreground">{formatDate(editingPayment.periodStart)} - {formatDate(editingPayment.periodEnd)}</span>
+                      Periode: <span className="font-medium text-foreground">{formatAppDate(editingPayment.periodStart)} - {formatAppDate(editingPayment.periodEnd)}</span>
                     </p>
                     <p>
                       Nominal: <span className="font-medium text-foreground">{formatRupiah(editingPayment.amount)}</span>
                     </p>
                     <p>
-                      Lunas tenant sampai: <span className="font-medium text-foreground">{formatDate(editingPayment.paidUntil)}</span>
+                      Lunas tenant sampai: <span className="font-medium text-foreground">{formatAppDate(editingPayment.paidUntil)}</span>
                     </p>
                   </div>
 
