@@ -143,6 +143,16 @@ function normalizeProofImageUrls(images: string[]) {
   );
 }
 
+function getProofImageDisplayUrl(imageUrl: string) {
+  const uploadPrefix = "/uploads/";
+
+  if (imageUrl.startsWith(uploadPrefix)) {
+    return `/api/uploads/${imageUrl.slice(uploadPrefix.length)}`;
+  }
+
+  return imageUrl;
+}
+
 function ImageStack({ images }: { images: string[] }) {
   const normalizedImages = normalizeProofImageUrls(images);
 
@@ -158,7 +168,14 @@ function ImageStack({ images }: { images: string[] }) {
             key={`${imageUrl}-${index}`}
             className="relative h-16 w-16 overflow-hidden rounded-md border border-border/70 bg-muted"
           >
-            <Image src={imageUrl} alt="Bukti pembayaran" fill className="object-cover" sizes="64px" />
+            <Image
+              src={getProofImageDisplayUrl(imageUrl)}
+              alt="Bukti pembayaran"
+              fill
+              unoptimized
+              className="object-cover"
+              sizes="64px"
+            />
           </div>
         ))}
       </div>

@@ -2,6 +2,22 @@ import { randomUUID } from "node:crypto";
 import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 
+export function getUploadsRootDir() {
+  return process.env.UPLOADS_DIR || path.join(/* turbopackIgnore: true */ process.cwd(), "public", "uploads");
+}
+
+export function resolveUploadPath(segments: string[]) {
+  const rootDir = path.resolve(getUploadsRootDir());
+  const filePath = path.resolve(rootDir, ...segments);
+  const relativePath = path.relative(rootDir, filePath);
+
+  if (relativePath.startsWith("..") || path.isAbsolute(relativePath)) {
+    return null;
+  }
+
+  return filePath;
+}
+
 function sanitizeFileName(fileName: string) {
   const cleaned = fileName.replace(/[^a-zA-Z0-9._-]/g, "-");
   return cleaned || "file";
@@ -93,7 +109,7 @@ export async function saveUploadedFiles(files: File[], folder: string) {
     return [];
   }
 
-  const targetDir = path.join(process.cwd(), "public", "uploads", folder);
+  const targetDir = path.join(getUploadsRootDir(), folder);
   await mkdir(targetDir, { recursive: true });
 
   return Promise.all(
