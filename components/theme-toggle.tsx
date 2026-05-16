@@ -11,12 +11,12 @@ export function ThemeToggle() {
 
   return (
     <Button
-      variant="secondary"
+      variant="ghost"
       size="sm"
       type="button"
       aria-label={isDark ? "Aktifkan light mode" : "Aktifkan dark mode"}
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="px-3"
+      className="h-8 w-8 p-0"
       suppressHydrationWarning
     >
       {isDark ? <SunMedium className="h-4 w-4" /> : <Moon className="h-4 w-4" />}

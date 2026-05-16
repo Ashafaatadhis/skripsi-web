@@ -3,48 +3,48 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: 210 40% 98%;
-  --foreground: 222 47% 11%;
+  --background: 0 0% 100%;
+  --foreground: 0 0% 9%;
   --card: 0 0% 100%;
-  --card-foreground: 222 47% 11%;
+  --card-foreground: 0 0% 9%;
   --popover: 0 0% 100%;
-  --popover-foreground: 222 47% 11%;
-  --primary: 191 97% 45%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96%;
-  --secondary-foreground: 222 47% 11%;
-  --muted: 210 40% 96%;
-  --muted-foreground: 215 16% 47%;
-  --accent: 210 40% 96%;
-  --accent-foreground: 222 47% 11%;
+  --popover-foreground: 0 0% 9%;
+  --primary: 153 58% 53%;
+  --primary-foreground: 0 0% 9%;
+  --secondary: 0 0% 98%;
+  --secondary-foreground: 0 0% 9%;
+  --muted: 0 0% 98%;
+  --muted-foreground: 0 0% 44%;
+  --accent: 0 0% 98%;
+  --accent-foreground: 0 0% 9%;
   --destructive: 0 84% 60%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214 32% 91%;
-  --input: 214 32% 91%;
-  --ring: 191 97% 45%;
-  --radius: 1.25rem;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 87%;
+  --input: 0 0% 87%;
+  --ring: 153 58% 53%;
+  --radius: 0.375rem;
 }
 
 .dark {
-  --background: 222 71% 4%;
-  --foreground: 210 40% 98%;
-  --card: 222 47% 11%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222 47% 11%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 191 97% 45%;
-  --primary-foreground: 222 47% 11%;
-  --secondary: 217 33% 17%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 215 28% 17%;
-  --muted-foreground: 215 20% 65%;
-  --accent: 217 33% 17%;
-  --accent-foreground: 210 40% 98%;
+  --background: 0 0% 11%;
+  --foreground: 0 0% 100%;
+  --card: 0 0% 13%;
+  --card-foreground: 0 0% 100%;
+  --popover: 0 0% 13%;
+  --popover-foreground: 0 0% 100%;
+  --primary: 153 58% 53%;
+  --primary-foreground: 0 0% 9%;
+  --secondary: 0 0% 16%;
+  --secondary-foreground: 0 0% 100%;
+  --muted: 0 0% 16%;
+  --muted-foreground: 0 0% 60%;
+  --accent: 0 0% 16%;
+  --accent-foreground: 0 0% 100%;
   --destructive: 0 84% 60%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 215 27% 22%;
-  --input: 215 27% 22%;
-  --ring: 191 97% 45%;
+  --destructive-foreground: 0 0% 98%;
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --ring: 153 58% 53%;
 }
 
 @theme inline {
@@ -67,10 +67,10 @@
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
-  --radius-sm: calc(var(--radius) - 0.5rem);
-  --radius-md: calc(var(--radius) - 0.25rem);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 0.5rem);
+  --radius-sm: calc(var(--radius) - 2px);
+  --radius-md: var(--radius);
+  --radius-lg: calc(var(--radius) + 6px);
+  --radius-xl: calc(var(--radius) + 10px);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
@@ -91,30 +91,6 @@
 
   body {
     @apply bg-background font-sans text-foreground;
-  }
-
-  .landing-shell {
-    background:
-      radial-gradient(circle at top, rgba(56, 189, 248, 0.14), transparent 30%),
-      linear-gradient(180deg, #f8fbff 0%, #eef6ff 48%, #f8fafc 100%);
-  }
-
-  html.dark .landing-shell {
-    background:
-      radial-gradient(circle at top, rgba(34, 211, 238, 0.16), transparent 30%),
-      linear-gradient(180deg, #020817 0%, #06101f 52%, #020617 100%);
-  }
-
-  .landing-grid {
-    background-image:
-      linear-gradient(rgba(148, 163, 184, 0.1) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(148, 163, 184, 0.1) 1px, transparent 1px);
-    background-size: 72px 72px;
-    opacity: 0.35;
-  }
-
-  html.dark .landing-grid {
-    opacity: 0.2;
   }
 
   a {

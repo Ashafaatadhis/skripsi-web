@@ -1,22 +1,24 @@
-import { AppDownloadSection } from "@/components/landing/app-download-section";
+import { CTASection } from "@/components/landing/app-download-section";
 import { FeaturesSection } from "@/components/landing/features-section";
 import { Footer } from "@/components/landing/footer";
-import { HeroSection } from "@/components/landing/hero-section";
+import { HeroSection, LogosSection } from "@/components/landing/hero-section";
 import { Navbar } from "@/components/landing/navbar";
-import { SecuritySection } from "@/components/landing/security-section";
+import { TestimonialsSection } from "@/components/landing/security-section";
+import { TelegramBotSection } from "@/components/landing/telegram-bot-section";
 
 export default function Home() {
   return (
-    <main className="landing-shell relative min-h-screen overflow-x-hidden bg-background">
-      <div className="landing-grid absolute inset-0" />
-      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8 px-4 pb-12 pt-6 sm:gap-10 sm:px-6 lg:gap-12 lg:px-8">
-        <Navbar />
+    <div className="flex w-full flex-col">
+      <Navbar />
+      <main className="grow">
         <HeroSection />
+        <LogosSection />
         <FeaturesSection />
-        <SecuritySection />
-        <AppDownloadSection />
-        <Footer />
-      </div>
-    </main>
+        <TelegramBotSection />
+        <TestimonialsSection />
+        <CTASection />
+      </main>
+      <Footer />
+    </div>
   );
 }

@@ -1,75 +1,118 @@
-import { BarChart3, Building2, CreditCard, MessageSquareText } from "lucide-react";
+"use client";
 
-import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Bath, Car, MapPin, Shield, Thermometer, Wifi } from "lucide-react";
+import { motion } from "framer-motion";
 
-const features = [
+const facilities = [
+  { icon: Wifi, label: "WiFi cepat di setiap kamar" },
+  { icon: Thermometer, label: "AC & water heater" },
+  { icon: Bath, label: "Kamar mandi dalam" },
+  { icon: Car, label: "Parkir motor & mobil" },
+  { icon: Shield, label: "CCTV & keamanan 24 jam" },
+  { icon: MapPin, label: "5 menit dari kampus" },
+];
+
+const images = [
   {
-    icon: CreditCard,
-    title: "Pembayaran digital",
-    description:
-      "Ringkas proses tagihan bulanan, validasi transfer, dan rekap pembayaran penghuni.",
+    src: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=600&auto=format&fit=crop&q=60",
+    alt: "Kamar kos furnished",
   },
   {
-    icon: Building2,
-    title: "Kontrol kamar",
-    description:
-      "Lihat ketersediaan kamar, histori penyewa, dan status hunian dari banyak kosan dalam satu panel.",
+    src: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=600&auto=format&fit=crop&q=60",
+    alt: "Kamar mandi bersih",
   },
   {
-    icon: MessageSquareText,
-    title: "Pengingat otomatis",
-    description:
-      "Kirim reminder pembayaran dan notifikasi operasional tanpa kerja manual berulang.",
+    src: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600&auto=format&fit=crop&q=60",
+    alt: "Ruang bersama",
   },
   {
-    icon: BarChart3,
-    title: "Insight pemasukan",
-    description:
-      "Analisis tren keterisian, arus kas, dan performa properti untuk keputusan lebih cepat.",
+    src: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&auto=format&fit=crop&q=60",
+    alt: "Ruang tamu",
   },
 ];
 
 export function FeaturesSection() {
   return (
-    <section className="space-y-8 pt-6 pb-14 sm:pt-8 sm:pb-16">
-      <div className="max-w-3xl space-y-4">
-        <Badge>Transaction features</Badge>
-        <h2 className="text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
-          Fitur utama untuk satu owner yang mengelola banyak kosan dan banyak kamar.
-        </h2>
-        <p className="text-base leading-7 text-slate-600 dark:text-slate-300">
-          Visual yang bersih dan profesional membantu membangun trust sejak first impression,
-          sambil tetap menonjolkan alur pembayaran dan operasional harian.
-        </p>
-      </div>
+    <section id="fasilitas" className="py-20 lg:py-28">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6">
+        <div className="grid items-center gap-12 lg:grid-cols-5 lg:gap-16">
+          {/* Left - text + list */}
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            transition={{ staggerChildren: 0.08 }}
+            className="lg:col-span-2"
+          >
+            <motion.p
+              variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
+              className="text-sm font-medium text-primary"
+            >
+              Fasilitas
+            </motion.p>
+            <h2 className="mt-3 text-3xl font-medium tracking-[-0.72px] sm:text-4xl">
+              {"Semua yang kamu butuhkan, sudah tersedia".split(" ").map((word, i) => (
+                <motion.span
+                  key={i}
+                  variants={{
+                    hidden: { opacity: 0, filter: "blur(8px)" },
+                    visible: { opacity: 1, filter: "blur(0px)" },
+                  }}
+                  transition={{ duration: 0.4 }}
+                  className="mr-[0.25em] inline-block"
+                >
+                  {word}
+                </motion.span>
+              ))}
+            </h2>
+            <motion.p
+              variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0 } }}
+              transition={{ duration: 0.4, delay: 0.5 }}
+              className="mt-4 text-base text-muted-foreground"
+            >
+              Tinggal bawa koper dan langsung produktif. Semua fasilitas siap
+              pakai dari hari pertama.
+            </motion.p>
 
-      <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-        {features.map((feature) => {
-          const Icon = feature.icon;
+            <ul className="mt-8 divide-y border-y">
+              {facilities.map((item, i) => {
+                const Icon = item.icon;
+                return (
+                  <motion.li
+                    key={item.label}
+                    variants={{ hidden: { opacity: 0, x: -10 }, visible: { opacity: 1, x: 0 } }}
+                    transition={{ duration: 0.3, delay: 0.6 + i * 0.08 }}
+                    className="flex items-center gap-3 py-3 text-[15px]"
+                  >
+                    <Icon className="size-4 text-primary" />
+                    {item.label}
+                  </motion.li>
+                );
+              })}
+            </ul>
+          </motion.div>
 
-          return (
-            <Card key={feature.title} className="h-full bg-white/75 dark:bg-white/8">
-              <CardHeader>
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/12 text-primary ring-1 ring-primary/10">
-                  <Icon className="h-5 w-5" />
-                </div>
-                <CardTitle className="pt-4 text-lg">{feature.title}</CardTitle>
-              </CardHeader>
-              <CardContent>
-                  <CardDescription className="text-sm leading-6 text-slate-600 dark:text-slate-300">
-                   {feature.description}
-                 </CardDescription>
-              </CardContent>
-            </Card>
-          );
-        })}
+          {/* Right - image grid */}
+          <div className="group grid grid-cols-2 gap-3 lg:col-span-3">
+            {images.map((img, i) => (
+              <motion.div
+                key={img.alt}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+                className="overflow-hidden rounded-lg border border-border transition-all duration-500 group-hover:scale-[0.97] group-hover:opacity-60 group-hover:blur-[2px] hover:!scale-105 hover:!opacity-100 hover:!blur-none"
+              >
+                <img
+                  src={img.src}
+                  alt={img.alt}
+                  className="aspect-[4/3] w-full object-cover"
+                  loading="lazy"
+                />
+              </motion.div>
+            ))}
+          </div>
+        </div>
       </div>
     </section>
   );

@@ -1,82 +1,130 @@
 "use client";
 
-import { motion, useMotionValueEvent, useScroll, useTransform } from "framer-motion";
-import { Building2, ShieldCheck } from "lucide-react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { Building2 } from "lucide-react";
 import Link from "next/link";
-import { useTheme } from "next-themes";
-import { useState } from "react";
 
+import { Button, buttonVariants } from "@/components/ui/button";
+import { MenuToggleIcon } from "@/components/ui/menu-toggle-icon";
+import { useScroll } from "@/components/ui/use-scroll";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-const navItems = ["Produk", "Keamanan", "Harga", "Kontak"];
+const links = [
+  { label: "Fasilitas", href: "#fasilitas" },
+  { label: "Testimoni", href: "#testimoni" },
+  { label: "Kontak", href: "#kontak" },
+];
 
 export function Navbar() {
-  const { scrollY } = useScroll();
-  const { resolvedTheme } = useTheme();
-  const [isPinned, setIsPinned] = useState(false);
-  const isDark = resolvedTheme === "dark";
-  const scale = useTransform(scrollY, [24, 120], [1, 0.985]);
-  const backgroundColor = useTransform(scrollY, [24, 120], isDark
-    ? ["rgba(2, 8, 23, 0.6)", "rgba(2, 8, 23, 0.88)"]
-    : ["rgba(255, 255, 255, 0.72)", "rgba(255, 255, 255, 0.92)"]);
-  const borderColor = useTransform(scrollY, [24, 120], isDark
-    ? ["rgba(255, 255, 255, 0.10)", "rgba(255, 255, 255, 0.16)"]
-    : ["rgba(148, 163, 184, 0.28)", "rgba(148, 163, 184, 0.42)"]);
-  const boxShadow = useTransform(scrollY, [24, 120], isDark
-    ? ["0 0 0 rgba(15, 23, 42, 0)", "0 18px 48px rgba(15, 23, 42, 0.35)"]
-    : ["0 0 0 rgba(15, 23, 42, 0)", "0 18px 48px rgba(148, 163, 184, 0.24)"]);
+  const [open, setOpen] = useState(false);
+  const scrolled = useScroll(10);
 
-  useMotionValueEvent(scrollY, "change", (latest) => {
-    setIsPinned(latest > 24);
-  });
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
 
   return (
-    <div className="relative h-[88px]">
-      <motion.header
-        className={isPinned ? "fixed inset-x-0 top-0 z-30 px-4 pt-3 sm:px-6 lg:px-8" : "relative z-20"}
-        initial={{ opacity: 0, y: -18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: "easeOut" }}
-      >
-      <motion.div
-        className="mx-auto flex w-full max-w-7xl items-center justify-between rounded-full border px-5 py-4 backdrop-blur-2xl sm:px-6"
-        style={{ scale, backgroundColor, borderColor, boxShadow }}
-      >
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/15 text-primary ring-1 ring-primary/10 dark:ring-white/10">
-            <Building2 className="h-5 w-5" />
+    <header
+      className={cn(
+        "sticky top-0 z-50 w-full border-b border-transparent",
+        scrolled &&
+          "border-border bg-background/95 backdrop-blur-lg supports-[backdrop-filter]:bg-background/50"
+      )}
+    >
+      <nav className="mx-auto flex h-14 w-full max-w-5xl items-center justify-between px-4">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2.5 rounded-md p-2 hover:bg-accent">
+          <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary">
+            <Building2 className="h-3.5 w-3.5 text-primary-foreground" />
           </div>
-          <div>
-            <p className="text-sm font-semibold text-foreground">KosanPay</p>
-            <p className="text-xs text-muted-foreground">Smart kost management</p>
-          </div>
-        </div>
+          <span className="text-sm font-medium">KosanPay</span>
+        </Link>
 
-        <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
-          {navItems.map((item) => (
-            <a key={item} href="#" className="transition hover:text-foreground">
-              {item}
+        {/* Desktop nav */}
+        <div className="hidden items-center gap-1 md:flex">
+          {links.map((link) => (
+            <a
+              key={link.label}
+              className={buttonVariants({ variant: "ghost", size: "sm" })}
+              href={link.href}
+            >
+              {link.label}
             </a>
           ))}
-        </nav>
-
-        <div className="flex items-center gap-3">
-          <div className="hidden items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:border-emerald-400/20 dark:text-emerald-200 sm:flex">
-            <ShieldCheck className="h-3.5 w-3.5" />
-            Sistem aman
-          </div>
           <ThemeToggle />
-          <Link
-            href="/login"
-            className={cn(buttonVariants({ variant: "secondary", size: "sm" }))}
-          >
-            Masuk Demo
+          <Link href="/login">
+            <Button size="sm">Masuk Demo</Button>
           </Link>
         </div>
-      </motion.div>
-      </motion.header>
-    </div>
+
+        {/* Mobile hamburger */}
+        <div className="flex items-center gap-1 md:hidden">
+          <ThemeToggle />
+          <Button
+            variant="ghost"
+            onClick={() => setOpen(!open)}
+            className="h-10 w-10 p-0"
+            aria-expanded={open}
+            aria-label="Toggle menu"
+          >
+            <MenuToggleIcon open={open} className="size-5" duration={300} />
+          </Button>
+        </div>
+      </nav>
+
+      {/* Mobile menu */}
+      <MobileMenu open={open}>
+        <div className="grid gap-y-1">
+          {links.map((link) => (
+            <a
+              key={link.label}
+              className={buttonVariants({
+                variant: "ghost",
+                className: "justify-start",
+              })}
+              href={link.href}
+              onClick={() => setOpen(false)}
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+        <div className="flex flex-col gap-2">
+          <Link href="/login" onClick={() => setOpen(false)}>
+            <Button className="w-full">Masuk Demo</Button>
+          </Link>
+        </div>
+      </MobileMenu>
+    </header>
+  );
+}
+
+function MobileMenu({
+  open,
+  children,
+}: {
+  open: boolean;
+  children: React.ReactNode;
+}) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!open || !mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-x-0 top-14 bottom-0 z-40 flex flex-col overflow-hidden border-t bg-background/95 backdrop-blur-lg md:hidden">
+      <div className="flex size-full animate-in fade-in zoom-in-97 flex-col justify-between p-4">
+        {children}
+      </div>
+    </div>,
+    document.body
   );
 }

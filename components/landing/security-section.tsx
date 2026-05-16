@@ -1,59 +1,144 @@
-import { Fingerprint, LockKeyhole, ShieldCheck, WalletCards } from "lucide-react";
+"use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
+import { motion } from "framer-motion";
+import { Quote, Star } from "lucide-react";
 
-const securityItems = [
+const testimonials = [
   {
-    icon: ShieldCheck,
-    title: "Role-based access",
-    description: "Akses web difokuskan untuk satu owner agar data bisnis dan operasional tetap terkontrol.",
+    name: "Raka Pratama",
+    role: "Mahasiswa UI",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&auto=format&fit=crop&q=60",
+    text: "Udah setahun di Lallakost, WiFi kenceng, kamar bersih, dan yang paling penting deket kampus. Gak perlu pindah-pindah lagi. Pokoknya worth it banget buat mahasiswa.",
+    rating: 5,
+    featured: true,
   },
   {
-    icon: Fingerprint,
-    title: "Audit activity",
-    description: "Semua aktivitas penting bisa dilacak untuk kebutuhan monitoring dan evaluasi.",
+    name: "Dina Safitri",
+    role: "Karyawan swasta",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&auto=format&fit=crop&q=60",
+    text: "Kamar mandi dalamnya bersih banget, AC dingin. Worth it buat harganya.",
+    rating: 5,
+    featured: false,
   },
   {
-    icon: LockKeyhole,
-    title: "Secure authentication",
-    description: "Alur login owner dirancang sederhana dan aman untuk dashboard pengelolaan bisnis kos.",
+    name: "Andi Wijaya",
+    role: "Mahasiswa Gunadarma",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&auto=format&fit=crop&q=60",
+    text: "Parkir luas, CCTV 24 jam, jadi aman ninggalin motor. Penjaga juga ramah.",
+    rating: 5,
+    featured: false,
   },
   {
-    icon: WalletCards,
-    title: "Payment confidence",
-    description: "Status pembayaran divisualkan jelas agar owner cepat mengambil tindakan yang tepat.",
+    name: "Sari Melati",
+    role: "Fresh graduate",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&auto=format&fit=crop&q=60",
+    text: "Pertama kali ngekos dan langsung cocok. Fasilitas lengkap, tinggal bawa badan aja.",
+    rating: 4,
+    featured: false,
+  },
+  {
+    name: "Bima Arya",
+    role: "Mahasiswa UPN",
+    avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&auto=format&fit=crop&q=60",
+    text: "Lokasinya strategis, mau ke mana-mana gampang. Pengelolanya juga responsif kalau ada kendala.",
+    rating: 5,
+    featured: false,
   },
 ];
 
-export function SecuritySection() {
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.12, delayChildren: 0.1 },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+};
+
+export function TestimonialsSection() {
+  const featured = testimonials[0];
+  const others = testimonials.slice(1);
+
   return (
-    <section className="grid gap-6 pt-6 pb-14 sm:pt-8 sm:pb-16 lg:grid-cols-[0.9fr_1.1fr]">
-      <Card className="bg-gradient-to-br from-cyan-100 via-white to-slate-100 p-8 dark:from-cyan-400/18 dark:via-slate-950 dark:to-slate-950">
-        <Badge className="mb-5">Security highlights</Badge>
-        <h2 className="max-w-md text-2xl font-semibold tracking-tight text-slate-950 dark:text-white sm:text-3xl">
-          Trust-building design yang didukung pesan keamanan yang kuat.
-        </h2>
-        <p className="mt-4 max-w-lg text-base leading-7 text-slate-600 dark:text-slate-300">
-          Nuansa biru, cyan, dan slate memberi kesan stabil dan kredibel, sementara kartu
-          glassmorphism menjaga tampilan tetap premium untuk presentasi skripsi.
-        </p>
-      </Card>
+    <section id="testimoni" className="py-20 lg:py-28">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6">
+        <motion.div
+          initial={{ opacity: 0, filter: "blur(6px)" }}
+          whileInView={{ opacity: 1, filter: "blur(0px)" }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="mx-auto max-w-xl text-center"
+        >
+          <p className="text-sm font-medium text-primary">Testimoni</p>
+          <h2 className="mt-3 text-3xl font-medium tracking-[-0.72px] sm:text-4xl">
+            Kata mereka yang sudah tinggal
+          </h2>
+        </motion.div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        {securityItems.map((item) => {
-          const Icon = item.icon;
-
-          return (
-            <Card key={item.title} className="p-6">
-              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary dark:bg-white/10 dark:text-cyan-200">
-                <Icon className="h-5 w-5" />
+        <motion.div
+          className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4 lg:grid-rows-2"
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, amount: 0.2 }}
+          variants={containerVariants}
+        >
+          {/* Featured card - large */}
+          <motion.div
+            variants={cardVariants}
+            className="relative flex flex-col justify-between rounded-xl border border-border bg-card p-8 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg sm:col-span-2 lg:row-span-2"
+          >
+            <div>
+              <Quote className="size-8 text-primary/20" />
+              <p className="mt-4 text-xl font-medium leading-relaxed">
+                &ldquo;{featured.text}&rdquo;
+              </p>
+            </div>
+            <div className="mt-8 flex items-center gap-3">
+              <img
+                src={featured.avatar}
+                alt={featured.name}
+                className="size-11 rounded-full object-cover"
+              />
+              <div>
+                <p className="text-sm font-medium">{featured.name}</p>
+                <p className="text-sm text-muted-foreground">{featured.role}</p>
               </div>
-              <h3 className="mt-5 text-lg font-semibold text-slate-950 dark:text-white">{item.title}</h3>
-              <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-slate-300">{item.description}</p>
-            </Card>
-          );
-        })}
+              <div className="ml-auto flex gap-0.5">
+                {Array.from({ length: featured.rating }).map((_, i) => (
+                  <Star key={i} className="size-3.5 fill-primary text-primary" />
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Other cards */}
+          {others.map((t) => (
+            <motion.div
+              key={t.name}
+              variants={cardVariants}
+              className="flex flex-col justify-between rounded-xl border border-border bg-card p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+            >
+              <p className="text-sm leading-relaxed text-muted-foreground">
+                &ldquo;{t.text}&rdquo;
+              </p>
+              <div className="mt-5 flex items-center gap-3">
+                <img
+                  src={t.avatar}
+                  alt={t.name}
+                  className="size-9 rounded-full object-cover"
+                />
+                <div>
+                  <p className="text-sm font-medium">{t.name}</p>
+                  <p className="text-xs text-muted-foreground">{t.role}</p>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
       </div>
     </section>
   );
