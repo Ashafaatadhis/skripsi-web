@@ -5,9 +5,15 @@ import { Bot, Send } from "lucide-react";
 
 const chatMessages = [
   { from: "user", text: "Halo, ada kamar kosong?" },
-  { from: "bot", text: "Halo! 👋 Saat ini tersedia 3 kamar:\n\n🚪 Kamar A3 - Rp 1.2jt/bln\n🚪 Kamar B1 - Rp 1.5jt/bln\n🚪 Kamar C2 - Rp 1.8jt/bln\n\nMau lihat detail yang mana?" },
+  {
+    from: "bot",
+    text: "Halo! 👋 Saat ini tersedia 3 kamar:\n\n🚪 Kamar A3 - Rp 1.2jt/bln\n🚪 Kamar B1 - Rp 1.5jt/bln\n🚪 Kamar C2 - Rp 1.8jt/bln\n\nMau lihat detail yang mana?",
+  },
   { from: "user", text: "Kamar B1 dong" },
-  { from: "bot", text: "🚪 Kamar B1\n• AC & Water Heater\n• Kamar mandi dalam\n• WiFi 50 Mbps\n• Ukuran 4x4m\n\n💰 Rp 1.500.000/bulan\n\nMau mulai sewa?" },
+  {
+    from: "bot",
+    text: "🚪 Kamar B1\n• Kamar mandi dalam\n• WiFi 50 Mbps\n• Ukuran 4x4m\n\n💰 Rp 1.500.000/bulan\n\nMau mulai sewa?",
+  },
 ];
 
 export function TelegramBotSection() {
@@ -28,7 +34,8 @@ export function TelegramBotSection() {
             </h2>
             <p className="mt-4 text-base text-muted-foreground">
               Cek kamar kosong, bayar sewa, kirim bukti transfer, dan lihat
-              status sewa — semua lewat Telegram. Tanpa install aplikasi tambahan.
+              status sewa — semua lewat Telegram. Tanpa install aplikasi
+              tambahan.
             </p>
             <ul className="mt-6 space-y-3 text-[15px] text-muted-foreground">
               <li className="flex items-center gap-2">
@@ -62,7 +69,9 @@ export function TelegramBotSection() {
                     <Bot className="size-4 text-white" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-white">LaKost AI</p>
+                    <p className="text-xs font-semibold text-white">
+                      LaKost AI
+                    </p>
                     <p className="text-[10px] text-white/70">online</p>
                   </div>
                 </div>

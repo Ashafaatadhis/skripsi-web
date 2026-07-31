@@ -12,29 +12,15 @@ const footerGroups = [
   },
   {
     title: "Fasilitas",
-    links: [
-      "WiFi Cepat",
-      "AC & Water Heater",
-      "Kamar Mandi Dalam",
-      "Parkir & Keamanan 24 Jam",
-    ],
+    links: ["WiFi Cepat", "Kamar Mandi Dalam", "Parkir & Keamanan 24 Jam"],
   },
   {
     title: "Bantuan",
-    links: [
-      "Panduan Penyewa",
-      "Cara Bayar Sewa",
-      "FAQ",
-      "Hubungi Admin",
-    ],
+    links: ["Panduan Penyewa", "Cara Bayar Sewa", "FAQ", "Hubungi Admin"],
   },
   {
     title: "Legal",
-    links: [
-      "Kebijakan Privasi",
-      "Syarat Penggunaan",
-      "Keamanan Data",
-    ],
+    links: ["Kebijakan Privasi", "Syarat Penggunaan", "Keamanan Data"],
   },
 ];
 

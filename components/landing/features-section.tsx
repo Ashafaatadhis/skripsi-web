@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 const facilities = [
   { icon: Wifi, label: "WiFi cepat di setiap kamar" },
-  { icon: Thermometer, label: "AC & water heater" },
+  // { icon: Thermometer, label: "AC & water heater" },
   { icon: Bath, label: "Kamar mandi dalam" },
   { icon: Car, label: "Parkir motor & mobil" },
   { icon: Shield, label: "CCTV & keamanan 24 jam" },
