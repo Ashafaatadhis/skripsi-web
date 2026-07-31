@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "KosanPay | Landing Page",
-  description: "Landing page modern untuk sistem manajemen kosan skripsi.",
+  title: "Kost Tofu | Kos Modern di Depok",
+  description: "Hunian kos modern di Depok dengan fasilitas lengkap. Kelola sewa dan bayar lewat Telegram.",
 };
 
 export default function RootLayout({

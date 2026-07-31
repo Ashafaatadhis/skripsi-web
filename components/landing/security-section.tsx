@@ -5,42 +5,42 @@ import { Quote, Star } from "lucide-react";
 
 const testimonials = [
   {
-    name: "Raka Pratama",
-    role: "Mahasiswa UI",
-    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&auto=format&fit=crop&q=60",
-    text: "Udah setahun di Lallakost, WiFi kenceng, kamar bersih, dan yang paling penting deket kampus. Gak perlu pindah-pindah lagi. Pokoknya worth it banget buat mahasiswa.",
+    name: "Suryati",
+    role: "Orang tua penghuni",
+    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&auto=format&fit=crop&q=60",
+    text: "Masyallah, kost murah dan nyaman... samping masjid. Alhamdulillah anak saya betah, karena pemilik dan penjaga ramah dan sangat membantu. Dekat juga dengan stasiun Pondok Cina, cuma 8 menit jalan kaki.",
     rating: 5,
     featured: true,
   },
   {
-    name: "Dina Safitri",
-    role: "Karyawan swasta",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=100&h=100&auto=format&fit=crop&q=60",
-    text: "Kamar mandi dalamnya bersih banget, AC dingin. Worth it buat harganya.",
-    rating: 5,
-    featured: false,
-  },
-  {
-    name: "Andi Wijaya",
+    name: "Muhammad Dafalaah",
     role: "Mahasiswa Gunadarma",
-    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&auto=format&fit=crop&q=60",
-    text: "Parkir luas, CCTV 24 jam, jadi aman ninggalin motor. Penjaga juga ramah.",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&h=100&auto=format&fit=crop&q=60",
+    text: "Kostan ternyaman, bersih, aman, cozy, lingkungannya strategis deket warung makan, masjid, resto, mall, universitas Gunadarma. Penjaga dan pemilik kostnya ramah, baik, harganya terjangkau banget untuk ukuran kamar mandi dalam + WiFi.",
     rating: 5,
     featured: false,
   },
   {
-    name: "Sari Melati",
-    role: "Fresh graduate",
+    name: "Lisda Khaironisa",
+    role: "Penghuni kos",
     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100&h=100&auto=format&fit=crop&q=60",
-    text: "Pertama kali ngekos dan langsung cocok. Fasilitas lengkap, tinggal bawa badan aja.",
-    rating: 4,
+    text: "Kosannya bagus, aman juga. Bapak kosnya baik, strategis, dekat masjid, ke kampus tinggal nyebrang.",
+    rating: 5,
     featured: false,
   },
   {
-    name: "Bima Arya",
-    role: "Mahasiswa UPN",
+    name: "Penghuni 1",
+    role: "Review Google Maps",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&auto=format&fit=crop&q=60",
+    text: "Banyak warteg, fried chicken, nasgor, soto, makanan arab, kafe pun dekat.",
+    rating: 5,
+    featured: false,
+  },
+  {
+    name: "Penghuni 2",
+    role: "Review Google Maps",
     avatar: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&auto=format&fit=crop&q=60",
-    text: "Lokasinya strategis, mau ke mana-mana gampang. Pengelolanya juga responsif kalau ada kendala.",
+    text: "Kost ternyaman untuk warga Depok, fasilitas oke banget, sangat rekomen! 👍🏼",
     rating: 5,
     featured: false,
   },
@@ -73,9 +73,9 @@ export function TestimonialsSection() {
           transition={{ duration: 0.6 }}
           className="mx-auto max-w-xl text-center"
         >
-          <p className="text-sm font-medium text-primary">Testimoni</p>
+          <p className="text-sm font-medium text-primary">Testimoni Penghuni</p>
           <h2 className="mt-3 text-3xl font-medium tracking-[-0.72px] sm:text-4xl">
-            Kata mereka yang sudah tinggal
+            Kata mereka yang sudah tinggal di Kost Tofu
           </h2>
         </motion.div>
 

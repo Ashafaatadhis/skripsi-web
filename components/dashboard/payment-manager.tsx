@@ -8,8 +8,10 @@ import {
   ChevronLeft,
   ChevronRight,
   CreditCard,
+  LoaderCircle,
   Pencil,
   Search,
+  Trash2,
   X,
 } from "lucide-react";
 
@@ -218,12 +220,26 @@ async function updatePayment(id: string, payload: PaymentPayload) {
   return data.payment;
 }
 
+async function deletePayment(id: string) {
+  const response = await fetch(`/api/pembayaran/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  const data = (await response.json()) as { message?: string };
+
+  if (!response.ok) {
+    throw new Error(data.message ?? "Gagal menghapus pembayaran.");
+  }
+}
+
 export function PaymentManager() {
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [editingPayment, setEditingPayment] = React.useState<PaymentItem | null>(null);
   const [form, setForm] = React.useState<PaymentPayload>(emptyForm);
   const [formError, setFormError] = React.useState<string | null>(null);
+  const [deleteTarget, setDeleteTarget] = React.useState<PaymentItem | null>(null);
   const [page, setPage] = React.useState(1);
   const [search, setSearch] = React.useState("");
   const deferredSearch = React.useDeferredValue(search);
@@ -247,6 +263,17 @@ export function PaymentManager() {
     },
     onError: (mutationError) => {
       setFormError(mutationError instanceof Error ? mutationError.message : "Gagal memperbarui pembayaran.");
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: deletePayment,
+    onSuccess: async () => {
+      setDeleteTarget(null);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: ["payments"] }),
+        queryClient.invalidateQueries({ queryKey: ["rentals"] }),
+      ]);
     },
   });
 
@@ -390,10 +417,20 @@ export function PaymentManager() {
                           <ImageStack images={payment.proofImageUrls} />
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button variant="secondary" size="sm" onClick={() => openEditDialog(payment)}>
-                            <Pencil className="h-4 w-4" />
-                            Verifikasi
-                          </Button>
+                          <div className="flex justify-end gap-2">
+                            <Button variant="secondary" size="sm" onClick={() => openEditDialog(payment)}>
+                              <Pencil className="h-4 w-4" />
+                              Verifikasi
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              size="sm"
+                              disabled={deleteMutation.isPending}
+                              onClick={() => setDeleteTarget(payment)}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))
@@ -570,6 +607,43 @@ export function PaymentManager() {
                   </div>
                 </form>
               ) : null}
+            </Dialog.Content>
+          </Dialog.Portal>
+        </Dialog.Root>
+
+        {/* Delete Confirmation */}
+        <Dialog.Root open={Boolean(deleteTarget)} onOpenChange={(open) => !open && setDeleteTarget(null)}>
+          <Dialog.Portal>
+            <Dialog.Overlay className="fixed inset-0 z-50 bg-slate-950/45 backdrop-blur-sm" />
+            <Dialog.Content className="fixed top-1/2 left-1/2 z-50 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-[2rem] border border-border/70 bg-card/95 p-6 shadow-[0_30px_100px_-50px_rgba(15,23,42,0.55)] outline-none">
+              <Dialog.Title className="text-xl font-semibold tracking-tight text-foreground">
+                Hapus pembayaran?
+              </Dialog.Title>
+              <Dialog.Description className="mt-2 text-sm leading-6 text-muted-foreground">
+                {deleteTarget
+                  ? `Pembayaran ${deleteTarget.humanId} (${formatRupiah(deleteTarget.amount)}) akan dihapus permanen. Riwayat paidUntil sewa akan diperbarui otomatis.`
+                  : "Konfirmasi penghapusan."}
+              </Dialog.Description>
+
+              {deleteMutation.error ? (
+                <div className="mt-4 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-300">
+                  {deleteMutation.error instanceof Error
+                    ? deleteMutation.error.message
+                    : "Gagal menghapus pembayaran."}
+                </div>
+              ) : null}
+
+              <div className="mt-6 flex flex-wrap gap-3">
+                <Button variant="secondary" onClick={() => setDeleteTarget(null)} disabled={deleteMutation.isPending}>
+                  Batal
+                </Button>
+                <Button
+                  onClick={() => deleteTarget && deleteMutation.mutate(deleteTarget.id)}
+                  disabled={deleteMutation.isPending}
+                >
+                  {deleteMutation.isPending ? "Menghapus..." : "Ya, hapus"}
+                </Button>
+              </div>
             </Dialog.Content>
           </Dialog.Portal>
         </Dialog.Root>

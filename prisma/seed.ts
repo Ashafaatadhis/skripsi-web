@@ -16,9 +16,9 @@ const prisma = new PrismaClient({
 });
 
 async function main() {
-  const email = process.env.SEED_OWNER_EMAIL ?? "owner@kosanpay.id";
-  const password = process.env.SEED_OWNER_PASSWORD ?? "owner123";
-  const name = process.env.SEED_OWNER_NAME ?? "Owner KosanPay";
+  const email = process.env.SEED_OWNER_EMAIL ?? "admin@kosttofu.id";
+  const password = process.env.SEED_OWNER_PASSWORD ?? "admin123";
+  const name = process.env.SEED_OWNER_NAME ?? "Admin Kost Tofu";
 
   await prisma.owner.upsert({
     where: { email },

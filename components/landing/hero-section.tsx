@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowRightIcon, SparklesIcon, PlayIcon } from "lucide-react";
 import { AnimatedGrid } from "@/components/ui/animated-grid";
 import { TextRotate } from "@/components/ui/text-rotate";
+import { useQuery } from "@tanstack/react-query";
 
 export function HeroSection() {
   return (
@@ -21,7 +22,7 @@ export function HeroSection() {
         {/* Announcement badge */}
         <a
           className="group mx-auto flex w-fit items-center gap-3 rounded-full border border-border bg-background px-3 py-1 shadow-sm"
-          href="#fitur"
+          href="#fasilitas"
         >
           <SparklesIcon className="size-3 text-primary" />
           <span className="text-xs text-muted-foreground">
@@ -58,7 +59,7 @@ export function HeroSection() {
 
         {/* Subheadline */}
         <p className="mx-auto max-w-lg text-center text-base text-muted-foreground sm:text-lg">
-          Lallakost menyediakan hunian kos dengan WiFi cepat, kamar mandi dalam,
+          Kost Tofu menyediakan hunian kos dengan WiFi cepat, kamar mandi dalam,
           dan lokasi dekat kampus. Tinggal fokus kuliah, urusan tempat tinggal biar kami yang urus.
         </p>
 
@@ -68,30 +69,54 @@ export function HeroSection() {
             <PlayIcon className="mr-2 size-4" />
             Lihat Virtual Tour
           </Button>
-          <Button className="rounded-full" size="lg">
-            Cek Kamar Tersedia
-            <ArrowRightIcon className="ms-2 size-4" />
-          </Button>
+          <a href="https://t.me/KosanTenantBot" target="_blank" rel="noopener noreferrer">
+            <Button className="rounded-full" size="lg">
+              Chat via Telegram
+              <ArrowRightIcon className="ms-2 size-4" />
+            </Button>
+          </a>
         </div>
       </div>
     </section>
   );
 }
 
+type PublicStats = {
+  activeTenants: number;
+  kosanCount: number;
+};
+
+async function getPublicStats(): Promise<PublicStats> {
+  const response = await fetch("/api/public/stats");
+  if (!response.ok) {
+    return { activeTenants: 0, kosanCount: 0 };
+  }
+  return response.json();
+}
+
 export function LogosSection() {
+  const { data } = useQuery({
+    queryKey: ["public-stats"],
+    queryFn: getPublicStats,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  const activeTenants = data?.activeTenants ?? 0;
+  const kosanCount = data?.kosanCount ?? 0;
+
   return (
     <section className="py-10">
       <div className="mx-auto flex max-w-3xl flex-wrap items-center justify-center gap-8 px-4 sm:gap-12 md:gap-16">
         <div className="text-center">
-          <p className="text-2xl font-medium text-foreground sm:text-3xl">200+</p>
+          <p className="text-2xl font-medium text-foreground sm:text-3xl">{activeTenants}+</p>
           <p className="mt-1 text-sm text-muted-foreground">Penghuni aktif</p>
         </div>
         <div className="text-center">
-          <p className="text-2xl font-medium text-foreground sm:text-3xl">4.8★</p>
-          <p className="mt-1 text-sm text-muted-foreground">Rating penghuni</p>
+          <p className="text-2xl font-medium text-foreground sm:text-3xl">5.0★</p>
+          <p className="mt-1 text-sm text-muted-foreground">Rating Google</p>
         </div>
         <div className="text-center">
-          <p className="text-2xl font-medium text-foreground sm:text-3xl">3</p>
+          <p className="text-2xl font-medium text-foreground sm:text-3xl">{kosanCount}</p>
           <p className="mt-1 text-sm text-muted-foreground">Lokasi di Depok</p>
         </div>
         <div className="text-center">

@@ -24,11 +24,11 @@ export function CTASection() {
           transition={{ duration: 0.6 }}
         >
           <h2 className="text-3xl font-medium tracking-[-0.72px] text-foreground sm:text-4xl">
-            Siap pindah ke Lallakost?
+            Siap pindah ke Kost Tofu?
           </h2>
           <p className="mx-auto mt-4 max-w-md text-base text-muted-foreground">
-            Kamar terbatas setiap bulannya. Hubungi kami sekarang untuk cek
-            ketersediaan dan booking kamar impianmu.
+            Kamar terbatas setiap bulannya. Chat kami di Telegram untuk cek
+            ketersediaan dan langsung booking kamar impianmu.
           </p>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <a href="https://t.me/KosanTenantBot" target="_blank" rel="noopener noreferrer">

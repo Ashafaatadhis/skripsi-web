@@ -42,7 +42,7 @@ export function Navbar() {
           <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary">
             <Building2 className="h-3.5 w-3.5 text-primary-foreground" />
           </div>
-          <span className="text-sm font-medium">KosanPay</span>
+          <span className="text-sm font-medium">Kost Tofu</span>
         </Link>
 
         {/* Desktop nav */}
@@ -58,7 +58,7 @@ export function Navbar() {
           ))}
           <ThemeToggle />
           <Link href="/login">
-            <Button size="sm">Masuk Demo</Button>
+            <Button size="sm">Masuk Owner</Button>
           </Link>
         </div>
 
@@ -96,7 +96,7 @@ export function Navbar() {
         </div>
         <div className="flex flex-col gap-2">
           <Link href="/login" onClick={() => setOpen(false)}>
-            <Button className="w-full">Masuk Demo</Button>
+            <Button className="w-full">Masuk Owner</Button>
           </Link>
         </div>
       </MobileMenu>

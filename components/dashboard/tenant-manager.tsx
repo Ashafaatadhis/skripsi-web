@@ -3,9 +3,8 @@
 import * as React from "react";
 import * as Dialog from "@radix-ui/react-dialog";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BookOpen, ChevronLeft, ChevronRight, LoaderCircle, Pencil, Search, Trash2, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, LoaderCircle, Pencil, Search, Trash2, Users, X } from "lucide-react";
 
-import { RentalStatus } from "@/generated/prisma/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -14,27 +13,28 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { formatAppDate } from "@/lib/datetime";
 
-type RentalItem = {
+type TenantActiveRental = {
   id: string;
   humanId: string;
-  roomId: string;
-  roomHumanId: string;
   roomName: string;
   kosanName: string;
-  tenantId: string;
-  tenantName: string;
-  tenantPhone: string | null;
   startDate: string;
-  paidUntil: string | null;
-  checkoutDate: string | null;
-  monthlyPriceSnapshot: number;
-  status: RentalStatus;
-  note: string | null;
+  monthlyPrice: number;
   paymentsCount: number;
 };
 
-type RentalResponse = {
-  rentals: RentalItem[];
+type TenantItem = {
+  id: string;
+  telegramId: string | null;
+  name: string;
+  phone: string | null;
+  createdAt: string;
+  activeRental: TenantActiveRental | null;
+  totalRentals: number;
+};
+
+type TenantResponse = {
+  tenants: TenantItem[];
   meta: {
     page: number;
     pageSize: number;
@@ -44,11 +44,10 @@ type RentalResponse = {
   };
 };
 
-const statusOptions = [
-  { value: RentalStatus.active, label: "Aktif" },
-  { value: RentalStatus.checked_out, label: "Check-out" },
-  { value: RentalStatus.cancelled, label: "Dibatalkan" },
-];
+type TenantPayload = {
+  name: string;
+  phone: string;
+};
 
 function formatRupiah(value: number) {
   return new Intl.NumberFormat("id-ID", {
@@ -58,43 +57,39 @@ function formatRupiah(value: number) {
   }).format(value);
 }
 
-function getStatusLabel(status: RentalStatus) {
-  return statusOptions.find((item) => item.value === status)?.label ?? status;
-}
-
-async function getRentals(page: number, q: string) {
+async function getTenants(page: number, q: string) {
   const params = new URLSearchParams({ page: String(page) });
   if (q.trim()) params.set("q", q.trim());
 
-  const response = await fetch(`/api/sewa?${params.toString()}`, { credentials: "include" });
-  const data = (await response.json()) as { message?: string } & RentalResponse;
+  const response = await fetch(`/api/tenants?${params.toString()}`, { credentials: "include" });
+  const data = (await response.json()) as { message?: string } & TenantResponse;
 
   if (!response.ok) {
-    throw new Error(data.message ?? "Gagal mengambil data sewa.");
+    throw new Error(data.message ?? "Gagal mengambil data penyewa.");
   }
 
   return data;
 }
 
-async function updateRental(id: string, payload: { status: string; note: string }) {
-  const response = await fetch(`/api/sewa/${id}`, {
+async function updateTenant(id: string, payload: TenantPayload) {
+  const response = await fetch(`/api/tenants/${id}`, {
     method: "PATCH",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload),
   });
 
-  const data = (await response.json()) as { message?: string; rental?: RentalItem };
+  const data = (await response.json()) as { message?: string; tenant?: { id: string; name: string; phone: string | null } };
 
-  if (!response.ok || !data.rental) {
-    throw new Error(data.message ?? "Gagal memperbarui sewa.");
+  if (!response.ok || !data.tenant) {
+    throw new Error(data.message ?? "Gagal memperbarui penyewa.");
   }
 
-  return data.rental;
+  return data.tenant;
 }
 
-async function deleteRental(id: string) {
-  const response = await fetch(`/api/sewa/${id}`, {
+async function deleteTenant(id: string) {
+  const response = await fetch(`/api/tenants/${id}`, {
     method: "DELETE",
     credentials: "include",
   });
@@ -102,50 +97,49 @@ async function deleteRental(id: string) {
   const data = (await response.json()) as { message?: string };
 
   if (!response.ok) {
-    throw new Error(data.message ?? "Gagal menghapus sewa.");
+    throw new Error(data.message ?? "Gagal menghapus penyewa.");
   }
 }
 
-export function RentalManager() {
+export function TenantManager() {
   const queryClient = useQueryClient();
   const [page, setPage] = React.useState(1);
   const [search, setSearch] = React.useState("");
   const deferredSearch = React.useDeferredValue(search);
   const [dialogOpen, setDialogOpen] = React.useState(false);
-  const [editingRental, setEditingRental] = React.useState<RentalItem | null>(null);
-  const [formStatus, setFormStatus] = React.useState<RentalStatus>(RentalStatus.active);
-  const [formNote, setFormNote] = React.useState("");
+  const [editingTenant, setEditingTenant] = React.useState<TenantItem | null>(null);
+  const [formName, setFormName] = React.useState("");
+  const [formPhone, setFormPhone] = React.useState("");
   const [formError, setFormError] = React.useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = React.useState<RentalItem | null>(null);
+  const [deleteTarget, setDeleteTarget] = React.useState<TenantItem | null>(null);
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["rentals", deferredSearch, page],
-    queryFn: () => getRentals(page, deferredSearch),
+    queryKey: ["tenants", deferredSearch, page],
+    queryFn: () => getTenants(page, deferredSearch),
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: { status: string; note: string } }) =>
-      updateRental(id, payload),
+    mutationFn: ({ id, payload }: { id: string; payload: TenantPayload }) => updateTenant(id, payload),
     onSuccess: async () => {
       setDialogOpen(false);
-      setEditingRental(null);
+      setEditingTenant(null);
       setFormError(null);
-      await queryClient.invalidateQueries({ queryKey: ["rentals"] });
+      await queryClient.invalidateQueries({ queryKey: ["tenants"] });
     },
     onError: (err) => {
-      setFormError(err instanceof Error ? err.message : "Gagal memperbarui sewa.");
+      setFormError(err instanceof Error ? err.message : "Gagal memperbarui penyewa.");
     },
   });
 
   const deleteMutation = useMutation({
-    mutationFn: deleteRental,
+    mutationFn: deleteTenant,
     onSuccess: async () => {
       setDeleteTarget(null);
-      await queryClient.invalidateQueries({ queryKey: ["rentals"] });
+      await queryClient.invalidateQueries({ queryKey: ["tenants"] });
     },
   });
 
-  const rentals = data?.rentals ?? [];
+  const tenants = data?.tenants ?? [];
   const meta = data?.meta ?? { page: 1, pageSize: 10, total: 0, totalPages: 1, q: "" };
 
   React.useEffect(() => {
@@ -158,22 +152,27 @@ export function RentalManager() {
     }
   }, [meta.page, page]);
 
-  function openEditDialog(rental: RentalItem) {
-    setEditingRental(rental);
-    setFormStatus(rental.status);
-    setFormNote(rental.note ?? "");
+  function openEditDialog(tenant: TenantItem) {
+    setEditingTenant(tenant);
+    setFormName(tenant.name);
+    setFormPhone(tenant.phone ?? "");
     setFormError(null);
     setDialogOpen(true);
   }
 
   function submitEdit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!editingRental) return;
+    if (!editingTenant) return;
+
+    if (!formName.trim()) {
+      setFormError("Nama penyewa wajib diisi.");
+      return;
+    }
 
     setFormError(null);
     updateMutation.mutate({
-      id: editingRental.id,
-      payload: { status: formStatus, note: formNote.trim() },
+      id: editingTenant.id,
+      payload: { name: formName.trim(), phone: formPhone.trim() },
     });
   }
 
@@ -183,11 +182,11 @@ export function RentalManager() {
         <header className="flex items-start gap-3 rounded-[2rem] border border-border/70 bg-card/90 p-5 shadow-sm sm:items-center sm:p-6">
           <SidebarTrigger className="mt-0.5 sm:mt-0" />
           <div className="space-y-2">
-            <Badge>Sewa</Badge>
+            <Badge>Penyewa</Badge>
             <div>
-              <h1 className="text-2xl font-semibold tracking-tight text-foreground">Daftar sewa</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-foreground">Daftar penyewa</h1>
               <p className="text-sm text-muted-foreground">
-                Sewa baru dibuat tenant lewat bot. Edit status atau hapus dari sini.
+                Penyewa terdaftar otomatis saat mulai sewa lewat Telegram. Edit atau hapus dari sini.
               </p>
             </div>
           </div>
@@ -197,10 +196,10 @@ export function RentalManager() {
           <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-                <BookOpen className="h-5 w-5" />
+                <Users className="h-5 w-5" />
               </div>
-              <CardTitle className="mt-3">Data sewa</CardTitle>
-              <CardDescription>{meta.total} sewa tercatat di akun owner ini.</CardDescription>
+              <CardTitle className="mt-3">Data penyewa</CardTitle>
+              <CardDescription>{meta.total} penyewa tercatat di akun owner ini.</CardDescription>
             </div>
 
             <div className="relative w-full sm:max-w-sm">
@@ -209,78 +208,78 @@ export function RentalManager() {
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 className="pl-10"
-                placeholder="Cari ID sewa, tenant, kamar, atau kosan"
+                placeholder="Cari nama, nomor HP, atau Telegram ID"
               />
             </div>
           </CardHeader>
+
           <CardContent className="space-y-4">
             <div className="rounded-[1.5rem] border border-border/70">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Sewa</TableHead>
-                    <TableHead>Tenant</TableHead>
-                    <TableHead>Kamar</TableHead>
-                    <TableHead>Mulai</TableHead>
-                    <TableHead>Lunas Sampai</TableHead>
+                    <TableHead>Penyewa</TableHead>
+                    <TableHead>Telegram</TableHead>
+                    <TableHead>Sewa Aktif</TableHead>
                     <TableHead>Harga / bulan</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead>Mulai Sewa</TableHead>
+                    <TableHead>Total Sewa</TableHead>
                     <TableHead className="text-right">Aksi</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {isLoading ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
-                        Memuat data sewa...
+                      <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
+                        Memuat data penyewa...
                       </TableCell>
                     </TableRow>
                   ) : error instanceof Error ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="h-24 text-center text-red-600 dark:text-red-300">
+                      <TableCell colSpan={7} className="h-24 text-center text-red-600 dark:text-red-300">
                         {error.message}
                       </TableCell>
                     </TableRow>
-                  ) : rentals.length ? (
-                    rentals.map((rental) => (
-                      <TableRow key={rental.id}>
+                  ) : tenants.length ? (
+                    tenants.map((tenant) => (
+                      <TableRow key={tenant.id}>
                         <TableCell>
                           <div className="space-y-1">
-                            <p className="font-medium text-foreground">{rental.humanId}</p>
-                            <p className="text-xs text-muted-foreground">{rental.paymentsCount} pembayaran</p>
+                            <p className="font-medium text-foreground">{tenant.name}</p>
+                            <p className="text-xs text-muted-foreground">{tenant.phone ?? "-"}</p>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          <div className="space-y-1">
-                            <p className="font-medium text-foreground">{rental.tenantName}</p>
-                            <p className="text-xs text-muted-foreground">{rental.tenantPhone ?? "-"}</p>
-                          </div>
+                        <TableCell className="font-mono text-xs text-muted-foreground">
+                          {tenant.telegramId ?? "-"}
                         </TableCell>
                         <TableCell>
-                          <div className="space-y-1">
-                            <p className="font-medium text-foreground">{rental.roomName}</p>
-                            <p className="text-xs text-muted-foreground">{rental.kosanName}</p>
-                          </div>
+                          {tenant.activeRental ? (
+                            <div className="space-y-1">
+                              <p className="font-medium text-foreground">{tenant.activeRental.roomName}</p>
+                              <p className="text-xs text-muted-foreground">{tenant.activeRental.kosanName}</p>
+                            </div>
+                          ) : (
+                            <Badge variant="secondary">Tidak aktif</Badge>
+                          )}
                         </TableCell>
-                        <TableCell className="text-muted-foreground">{formatAppDate(rental.startDate)}</TableCell>
-                        <TableCell className="text-muted-foreground">{formatAppDate(rental.paidUntil)}</TableCell>
-                        <TableCell className="text-muted-foreground">{formatRupiah(rental.monthlyPriceSnapshot)}</TableCell>
-                        <TableCell>
-                          <Badge variant={rental.status === RentalStatus.active ? "default" : "secondary"}>
-                            {getStatusLabel(rental.status)}
-                          </Badge>
+                        <TableCell className="text-muted-foreground">
+                          {tenant.activeRental ? formatRupiah(tenant.activeRental.monthlyPrice) : "-"}
                         </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {tenant.activeRental ? formatAppDate(tenant.activeRental.startDate) : "-"}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">{tenant.totalRentals}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            <Button variant="secondary" size="sm" onClick={() => openEditDialog(rental)}>
+                            <Button variant="secondary" size="sm" onClick={() => openEditDialog(tenant)}>
                               <Pencil className="h-3.5 w-3.5" />
                             </Button>
-                            {rental.status !== "active" && (
+                            {!tenant.activeRental && (
                               <Button
                                 variant="secondary"
                                 size="sm"
                                 disabled={deleteMutation.isPending}
-                                onClick={() => setDeleteTarget(rental)}
+                                onClick={() => setDeleteTarget(tenant)}
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>
@@ -291,10 +290,10 @@ export function RentalManager() {
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={8} className="h-24 text-center text-muted-foreground">
+                      <TableCell colSpan={7} className="h-24 text-center text-muted-foreground">
                         {search.trim()
-                          ? "Data sewa tidak ditemukan untuk pencarian ini."
-                          : "Belum ada sewa. Tenant akan muncul di sini setelah mulai sewa lewat bot."}
+                          ? "Penyewa tidak ditemukan untuk pencarian ini."
+                          : "Belum ada penyewa. Penyewa akan muncul di sini setelah mulai sewa lewat Telegram."}
                       </TableCell>
                     </TableRow>
                   )}
@@ -304,7 +303,7 @@ export function RentalManager() {
 
             <div className="flex flex-col gap-3 rounded-[1.5rem] border border-border/70 bg-background/70 p-4 sm:flex-row sm:items-center sm:justify-between">
               <p className="text-sm text-muted-foreground">
-                Menampilkan {rentals.length} dari {meta.total} sewa
+                Menampilkan {tenants.length} dari {meta.total} penyewa
               </p>
               <div className="flex items-center gap-2">
                 <Button
@@ -339,7 +338,7 @@ export function RentalManager() {
           onOpenChange={(open) => {
             setDialogOpen(open);
             if (!open) {
-              setEditingRental(null);
+              setEditingTenant(null);
               setFormError(null);
             }
           }}
@@ -350,12 +349,12 @@ export function RentalManager() {
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <Dialog.Title className="text-xl font-semibold tracking-tight text-foreground">
-                    Edit sewa
+                    Edit penyewa
                   </Dialog.Title>
                   <Dialog.Description className="mt-2 text-sm leading-6 text-muted-foreground">
-                    {editingRental
-                      ? `${editingRental.humanId} - ${editingRental.tenantName}`
-                      : "Pilih sewa dulu."}
+                    {editingTenant
+                      ? `Ubah data ${editingTenant.name}`
+                      : "Pilih penyewa dulu."}
                   </Dialog.Description>
                 </div>
                 <Dialog.Close asChild>
@@ -369,47 +368,39 @@ export function RentalManager() {
                 </Dialog.Close>
               </div>
 
-              {editingRental ? (
+              {editingTenant ? (
                 <form className="mt-6 space-y-4" onSubmit={submitEdit}>
-                  <div className="rounded-2xl border border-border/70 bg-background/70 p-4 text-sm text-muted-foreground">
-                    <p>
-                      Kamar: <span className="font-medium text-foreground">{editingRental.roomName} - {editingRental.kosanName}</span>
-                    </p>
-                    <p>
-                      Harga: <span className="font-medium text-foreground">{formatRupiah(editingRental.monthlyPriceSnapshot)}</span>
-                    </p>
+                  {editingTenant.telegramId && (
+                    <div className="rounded-2xl border border-border/70 bg-background/70 p-4 text-sm text-muted-foreground">
+                      <p>
+                        Telegram ID: <span className="font-mono font-medium text-foreground">{editingTenant.telegramId}</span>
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-foreground" htmlFor="tenant-name">
+                      Nama
+                    </label>
+                    <Input
+                      id="tenant-name"
+                      value={formName}
+                      disabled={updateMutation.isPending}
+                      onChange={(event) => setFormName(event.target.value)}
+                      placeholder="Nama penyewa"
+                    />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground" htmlFor="rental-status">
-                      Status
+                    <label className="text-sm font-medium text-foreground" htmlFor="tenant-phone">
+                      Nomor HP
                     </label>
-                    <select
-                      id="rental-status"
-                      value={formStatus}
+                    <Input
+                      id="tenant-phone"
+                      value={formPhone}
                       disabled={updateMutation.isPending}
-                      onChange={(event) => setFormStatus(event.target.value as RentalStatus)}
-                      className="flex h-12 w-full rounded-2xl border border-border/70 bg-background/90 px-4 text-sm text-foreground shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 dark:bg-background/50"
-                    >
-                      {statusOptions.map((option) => (
-                        <option key={option.value} value={option.value}>
-                          {option.label}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-foreground" htmlFor="rental-note">
-                      Catatan
-                    </label>
-                    <textarea
-                      id="rental-note"
-                      value={formNote}
-                      disabled={updateMutation.isPending}
-                      onChange={(event) => setFormNote(event.target.value)}
-                      className="min-h-24 w-full rounded-2xl border border-border/70 bg-background/90 px-4 py-3 text-sm text-foreground shadow-sm outline-none transition focus-visible:ring-2 focus-visible:ring-ring/60 focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 dark:bg-background/50"
-                      placeholder="Catatan tambahan tentang sewa ini."
+                      onChange={(event) => setFormPhone(event.target.value)}
+                      placeholder="08123456789"
                     />
                   </div>
 
@@ -448,11 +439,11 @@ export function RentalManager() {
             <Dialog.Overlay className="fixed inset-0 z-50 bg-slate-950/45 backdrop-blur-sm" />
             <Dialog.Content className="fixed top-1/2 left-1/2 z-50 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-[2rem] border border-border/70 bg-card/95 p-6 shadow-[0_30px_100px_-50px_rgba(15,23,42,0.55)] outline-none">
               <Dialog.Title className="text-xl font-semibold tracking-tight text-foreground">
-                Hapus data sewa?
+                Hapus penyewa?
               </Dialog.Title>
               <Dialog.Description className="mt-2 text-sm leading-6 text-muted-foreground">
                 {deleteTarget
-                  ? `Data sewa ${deleteTarget.humanId} (${deleteTarget.tenantName}) akan dihapus permanen. Aksi ini tidak bisa dibatalkan.`
+                  ? `Data ${deleteTarget.name} akan dihapus permanen. Aksi ini tidak bisa dibatalkan.`
                   : "Konfirmasi penghapusan."}
               </Dialog.Description>
 
@@ -460,7 +451,7 @@ export function RentalManager() {
                 <div className="mt-4 rounded-2xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-600 dark:text-red-300">
                   {deleteMutation.error instanceof Error
                     ? deleteMutation.error.message
-                    : "Gagal menghapus sewa."}
+                    : "Gagal menghapus penyewa."}
                 </div>
               ) : null}
 

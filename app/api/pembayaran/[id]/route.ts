@@ -154,9 +154,31 @@ export async function PATCH(request: Request, context: RouteContext) {
   return NextResponse.json({ payment: mapPayment(refreshed ?? updated) });
 }
 
-export async function DELETE() {
-  return NextResponse.json(
-    { message: "Penghapusan pembayaran dari dashboard dinonaktifkan." },
-    { status: 405 },
-  );
+export async function DELETE(_request: Request, context: RouteContext) {
+  const owner = await getCurrentOwner();
+
+  if (!owner) {
+    return NextResponse.json({ message: "Unauthorized." }, { status: 401 });
+  }
+
+  const { id } = await context.params;
+
+  const existing = await prisma.payment.findFirst({
+    where: {
+      id,
+      rental: {
+        room: { kosan: { ownerId: owner.id } },
+      },
+    },
+    select: { id: true, rentalId: true },
+  });
+
+  if (!existing) {
+    return NextResponse.json({ message: "Data pembayaran tidak ditemukan." }, { status: 404 });
+  }
+
+  await prisma.payment.delete({ where: { id: existing.id } });
+  await syncRentalPaidUntil(existing.rentalId);
+
+  return NextResponse.json({ message: "Pembayaran berhasil dihapus." });
 }

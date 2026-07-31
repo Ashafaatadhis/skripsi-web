@@ -2,30 +2,30 @@ import { Building2, Globe, MessageCircleMore } from "lucide-react";
 
 const footerGroups = [
   {
-    title: "Produk",
+    title: "Layanan",
     links: [
-      "Dashboard Owner",
-      "Monitoring Kamar",
-      "Pembayaran Penghuni",
-      "Laporan Operasional",
+      "Cek Ketersediaan Kamar",
+      "Status Sewa Saya",
+      "Riwayat Pembayaran",
+      "Chat via Telegram",
     ],
   },
   {
-    title: "Perusahaan",
+    title: "Fasilitas",
     links: [
-      "Tentang Proyek",
-      "Use Case Skripsi",
-      "Arsitektur Sistem",
-      "Roadmap Produk",
+      "WiFi Cepat",
+      "AC & Water Heater",
+      "Kamar Mandi Dalam",
+      "Parkir & Keamanan 24 Jam",
     ],
   },
   {
-    title: "Resource",
+    title: "Bantuan",
     links: [
-      "Panduan Owner",
-      "Alur Telegram Tenant",
-      "FAQ Pembayaran",
-      "Dokumentasi API",
+      "Panduan Penyewa",
+      "Cara Bayar Sewa",
+      "FAQ",
+      "Hubungi Admin",
     ],
   },
   {
@@ -34,7 +34,6 @@ const footerGroups = [
       "Kebijakan Privasi",
       "Syarat Penggunaan",
       "Keamanan Data",
-      "Audit Aktivitas",
     ],
   },
 ];
@@ -42,7 +41,6 @@ const footerGroups = [
 const socialLinks = [
   { label: "Telegram", icon: MessageCircleMore },
   { label: "Website", icon: Globe },
-  { label: "Owner Portal", icon: Building2 },
 ];
 
 export function Footer() {
@@ -57,13 +55,13 @@ export function Footer() {
                 <Building2 className="h-4 w-4 text-primary-foreground" />
               </div>
               <span className="text-[15px] font-medium text-foreground">
-                KosanPay
+                Kost Tofu
               </span>
             </div>
 
             <p className="text-[13px] leading-relaxed text-muted-foreground">
-              Satu dashboard owner untuk mengelola banyak kosan, banyak kamar,
-              dan alur pembayaran tenant lewat Telegram.
+              Hunian kos modern di Depok dengan fasilitas lengkap. Kelola sewa
+              dan bayar langsung dari Telegram.
             </p>
 
             <div className="flex items-center gap-2">
@@ -107,8 +105,7 @@ export function Footer() {
         {/* Bottom bar */}
         <div className="mt-12 border-t border-border pt-6">
           <p className="text-[13px] text-muted-foreground">
-            © 2026 KosanPay. Landing page konsep untuk proyek skripsi manajemen
-            kosan.
+            © 2026 Kost Tofu. Hunian kos modern di Depok.
           </p>
         </div>
       </div>

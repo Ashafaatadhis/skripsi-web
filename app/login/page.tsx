@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { getCurrentOwner } from "@/lib/auth";
 
-const highlights = ["Banyak kosan", "Status pembayaran", "Tenant via Telegram"];
+const highlights = ["Kelola kosan & kamar", "Verifikasi pembayaran", "Pantau sewa tenant"];
 
 export default async function LoginPage() {
   const owner = await getCurrentOwner();
@@ -30,8 +30,8 @@ export default async function LoginPage() {
                     <Building2 className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-lg font-semibold text-foreground">KosanPay</p>
-                    <p className="text-sm text-muted-foreground">Owner web access</p>
+                    <p className="text-lg font-semibold text-foreground">Kost Tofu</p>
+                    <p className="text-sm text-muted-foreground">Owner dashboard</p>
                   </div>
                 </div>
 
@@ -45,13 +45,13 @@ export default async function LoginPage() {
               </div>
 
               <div className="space-y-4">
-                <Badge>Secure owner login</Badge>
+                <Badge>Owner dashboard</Badge>
                 <div className="space-y-3">
                   <h1 className="max-w-lg text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
-                    Masuk ke dashboard owner.
+                    Kelola kosan dari satu tempat.
                   </h1>
                   <p className="max-w-md text-base leading-7 text-muted-foreground">
-                    Kelola kosan, kamar, dan pembayaran dari satu tempat.
+                    Pantau kamar, verifikasi pembayaran, dan kelola sewa tenant.
                   </p>
                 </div>
               </div>
@@ -83,7 +83,7 @@ export default async function LoginPage() {
                 <h2 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
                   Selamat datang kembali
                 </h2>
-                <p className="text-sm leading-6 text-muted-foreground">Masukkan akun Anda.</p>
+                <p className="text-sm leading-6 text-muted-foreground">Masukkan akun owner Anda.</p>
               </div>
 
               <LoginForm />

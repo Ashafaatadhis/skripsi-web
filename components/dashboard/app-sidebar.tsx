@@ -8,6 +8,7 @@ import {
   DoorOpen,
   CreditCard,
   LayoutDashboard,
+  Users,
 } from "lucide-react";
 
 import {
@@ -28,6 +29,7 @@ const mainItems = [
   { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { title: "Kosan", href: "/dashboard/kosan", icon: Building2 },
   { title: "Kamar", href: "/dashboard/kamar", icon: DoorOpen },
+  { title: "Penyewa", href: "/dashboard/penyewa", icon: Users },
   { title: "Sewa", href: "/dashboard/sewa", icon: BookOpen },
   { title: "Pembayaran", href: "/dashboard/pembayaran", icon: CreditCard },
 ];
@@ -51,7 +53,7 @@ export function AppSidebar({ owner }: AppSidebarProps) {
             <Building2 className="h-5 w-5" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-foreground">KosanPay</p>
+            <p className="text-sm font-semibold text-foreground">Kost Tofu</p>
             <p className="text-xs text-muted-foreground">Owner dashboard</p>
           </div>
         </div>

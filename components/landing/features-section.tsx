@@ -14,20 +14,20 @@ const facilities = [
 
 const images = [
   {
-    src: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=600&auto=format&fit=crop&q=60",
-    alt: "Kamar kos furnished",
+    src: "/gambar1kos.jpg",
+    alt: "Kamar kos",
   },
   {
-    src: "https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=600&auto=format&fit=crop&q=60",
-    alt: "Kamar mandi bersih",
+    src: "/gambar2kos.jpg",
+    alt: "Fasilitas kos",
   },
   {
-    src: "https://images.unsplash.com/photo-1555854877-bab0e564b8d5?w=600&auto=format&fit=crop&q=60",
+    src: "/gambar3kos.jpg",
     alt: "Ruang bersama",
   },
   {
-    src: "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&auto=format&fit=crop&q=60",
-    alt: "Ruang tamu",
+    src: "/gambar4kos.jpg",
+    alt: "Area kos",
   },
 ];
 
@@ -51,22 +51,27 @@ export function FeaturesSection() {
               Fasilitas
             </motion.p>
             <h2 className="mt-3 text-3xl font-medium tracking-[-0.72px] sm:text-4xl">
-              {"Semua yang kamu butuhkan, sudah tersedia".split(" ").map((word, i) => (
-                <motion.span
-                  key={i}
-                  variants={{
-                    hidden: { opacity: 0, filter: "blur(8px)" },
-                    visible: { opacity: 1, filter: "blur(0px)" },
-                  }}
-                  transition={{ duration: 0.4 }}
-                  className="mr-[0.25em] inline-block"
-                >
-                  {word}
-                </motion.span>
-              ))}
+              {"Semua yang kamu butuhkan, sudah tersedia"
+                .split(" ")
+                .map((word, i) => (
+                  <motion.span
+                    key={i}
+                    variants={{
+                      hidden: { opacity: 0, filter: "blur(8px)" },
+                      visible: { opacity: 1, filter: "blur(0px)" },
+                    }}
+                    transition={{ duration: 0.4 }}
+                    className="mr-[0.25em] inline-block"
+                  >
+                    {word}
+                  </motion.span>
+                ))}
             </h2>
             <motion.p
-              variants={{ hidden: { opacity: 0, y: 8 }, visible: { opacity: 1, y: 0 } }}
+              variants={{
+                hidden: { opacity: 0, y: 8 },
+                visible: { opacity: 1, y: 0 },
+              }}
               transition={{ duration: 0.4, delay: 0.5 }}
               className="mt-4 text-base text-muted-foreground"
             >
@@ -80,7 +85,10 @@ export function FeaturesSection() {
                 return (
                   <motion.li
                     key={item.label}
-                    variants={{ hidden: { opacity: 0, x: -10 }, visible: { opacity: 1, x: 0 } }}
+                    variants={{
+                      hidden: { opacity: 0, x: -10 },
+                      visible: { opacity: 1, x: 0 },
+                    }}
                     transition={{ duration: 0.3, delay: 0.6 + i * 0.08 }}
                     className="flex items-center gap-3 py-3 text-[15px]"
                   >

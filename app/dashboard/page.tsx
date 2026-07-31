@@ -7,6 +7,7 @@ import {
   CreditCard,
   DoorOpen,
   Search,
+  Users,
 } from "lucide-react";
 
 import { OverviewCharts } from "@/components/dashboard/overview-charts";
@@ -33,6 +34,12 @@ const actions = [
     description: "Lihat daftar kamar dan status sewanya.",
     href: "/dashboard/kamar",
     icon: DoorOpen,
+  },
+  {
+    title: "Penyewa",
+    description: "Lihat daftar penyewa dan data kontaknya.",
+    href: "/dashboard/penyewa",
+    icon: Users,
   },
   {
     title: "Pembayaran",
@@ -190,7 +197,7 @@ export default async function DashboardPage() {
 
         <OverviewCharts charts={overview.charts} />
 
-        <section className="grid gap-4 lg:grid-cols-2 xl:grid-cols-4">
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {actions.map((action) => {
             const Icon = action.icon;
 
